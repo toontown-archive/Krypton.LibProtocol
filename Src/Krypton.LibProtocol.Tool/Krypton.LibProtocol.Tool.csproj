@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>dotnet-krypton</AssemblyName>
+    <PackageId>Krypton.LibProtocol.Tool</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <PackageType>DotnetCliTool</PackageType>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Krypton.LibProtocol\Krypton.LibProtocol.csproj" />
+  </ItemGroup>
+</Project>

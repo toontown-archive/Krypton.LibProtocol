@@ -1,0 +1,6 @@
+# .NET Core artifacts:
+obj/
+bin/
+
+# ANTLR artifacts:
+*.tokens
