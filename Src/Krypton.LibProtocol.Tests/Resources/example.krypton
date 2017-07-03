@@ -1,0 +1,32 @@
+group ClusterMember;
+
+library Krypton {
+    packet Packet {
+        uint16 message_type;
+        buffer data;
+    }
+}
+
+library Flow {
+    packet PacketHeader {
+        uint16 context;
+    }
+}
+
+protocol Krypton.Node[Management] {
+    Kill,
+    Hello,
+    HelloResponse
+
+    packet Kill {
+        bool silent;
+        (silent == false) => {
+            string reason;
+        };
+    }
+
+    packet Hello : Flow[PacketHeader] {
+        uint32 infrastructre_hash;
+        uint32 protocol_hash;
+    }
+}
