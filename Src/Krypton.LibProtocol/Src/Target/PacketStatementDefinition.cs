@@ -4,7 +4,10 @@
     {
     }
 
-    public abstract class PacketStatementDefinition : TargetDefinable
+    public abstract class PacketStatementDefinition : Definition
     {
+        protected PacketStatementDefinition(DefinitionContext context) : base(context)
+        {
+        }
     }
 }
