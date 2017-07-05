@@ -3,17 +3,15 @@ using Krypton.LibProtocol.Parser;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Packet : IStatementContainer
+    public class Packet : StatementContainer
     {
         public string Name { get; }
         public IList<Packet> Parents { get; }
-        public IList<PacketStatement> Statements { get; }
 
         internal Packet(string name)
         {
             Name = name;
             Parents = new List<Packet>();
-            Statements = new List<PacketStatement>();
         }
 
         internal void AddParent(Packet parent)
@@ -26,7 +24,7 @@ namespace Krypton.LibProtocol.Member
             Parents.Add(parent);
         }
 
-        public void AddStatement(PacketStatement statement)
+        public override void AddStatement(IPacketStatement statement)
         {
             var data = statement as DataStatement;
             if (data != null)
@@ -35,14 +33,19 @@ namespace Krypton.LibProtocol.Member
             }
             else
             {
-                Statements.Add(statement);
+                AddStatement(statement as ConditionalStatement);
             }
-
         }
 
-        internal void AddStatement(DataStatement statement)
+        private void AddStatement(DataStatement statement)
         {
-            // todo: check if the name has already been defined
+            // todo: checks
+            Statements.Add(statement);
+        }
+
+        private void AddStatement(ConditionalStatement statement)
+        {
+            // todo: checks
             Statements.Add(statement);
         }
     }

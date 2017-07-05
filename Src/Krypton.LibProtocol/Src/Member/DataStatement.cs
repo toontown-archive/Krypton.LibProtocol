@@ -17,7 +17,7 @@
         Buffer
     }
 
-    public class DataStatement : PacketStatement
+    public class DataStatement : IPacketStatement
     {
         public Primitive Type { get; }
         public string Name { get; }

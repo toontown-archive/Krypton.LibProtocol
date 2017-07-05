@@ -27,18 +27,16 @@ namespace Krypton.LibProtocol.Member
         public string Val2 { get; internal set; }
     }
 
-    public class ConditionalStatement : PacketStatement, IStatementContainer
+    public class ConditionalStatement : StatementContainer, IPacketStatement 
     {
         public Condition Condition { get; }
-        public IList<PacketStatement> Statements { get; }
 
         internal ConditionalStatement(Condition condition)
         {
             Condition = condition;
-            Statements = new List<PacketStatement>();
         }
         
-        public void AddStatement(PacketStatement statement)
+        public override void AddStatement(IPacketStatement statement)
         {
             var data = statement as DataStatement;
             if (data != null)
@@ -52,13 +50,16 @@ namespace Krypton.LibProtocol.Member
 
         }
 
-        internal void AddStatement(DataStatement statement)
+        private void AddStatement(DataStatement statement)
         {
-            // todo: check if the name has already been defined
+            // todo: checks
+            Statements.Add(statement);
         }
 
-        internal void AddStatement(ConditionalStatement statement)
+        private void AddStatement(ConditionalStatement statement)
         {
+            // todo: checks
+            Statements.Add(statement);
         }
 
         public static Operator OperatorFromString(string s)
