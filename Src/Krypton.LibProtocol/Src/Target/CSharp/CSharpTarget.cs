@@ -51,28 +51,14 @@ namespace Krypton.LibProtocol.Target.CSharp
             _protocols.Add((CSharpProtocolContext)context);
         }
 
-        public override void Write(TargetSettings settings)
+        private void WriteNamespace(CodeNamespace ns, string output)
         {
-            var s = (CSharpTargetSettings) settings;
-            
-            var namespaceCollection = new CodeNamespaceCollection();
-            
-            // create the groups
-            var groupsNamespace = TargetUtil.CreateNamespace(s.Groups.Namespace);
-            var groupsClass = TargetUtil.CreateClass(s.Groups.ClassName, groupsNamespace);
-            foreach (var group in _groups)
-            {
-                groupsClass.Members.Add(group.MemberField);
-            }
-            namespaceCollection.Add(groupsNamespace);
-            
-            // add each protocol
-            foreach (var protocol in _protocols)
-            {
-                namespaceCollection.Add(protocol.Namespace);
-            }
+            var collection = new CodeNamespaceCollection {ns};
+            WriteNamespace(collection, output);
+        }
 
-            // generate the code
+        private void WriteNamespace(CodeNamespaceCollection ns, string output)
+        {
             var provider = CodeDomProvider.CreateProvider("CSharp");
             var options = new CodeGeneratorOptions
             {
@@ -80,15 +66,49 @@ namespace Krypton.LibProtocol.Target.CSharp
             };
 
             var ccu = new CodeCompileUnit();
-            ccu.Namespaces.AddRange(namespaceCollection);
+            ccu.Namespaces.AddRange(ns);
 
-            using (var stream = new StreamWriter(s.Output))
+            using (var stream = new StreamWriter(output))
             {
                 provider.GenerateCodeFromCompileUnit(ccu, stream, options);
             }
         }
+
+        public override void Write(TargetSettings settings)
+        {
+            var s = (CSharpTargetSettings) settings;
+
+            // write the groups
+            var groupsNamespace = TargetUtil.CreateNamespace(s.Groups.Namespace);
+            var groupsClass = TargetUtil.CreateClass(s.Groups.ClassName, groupsNamespace);
+            foreach (var group in _groups)
+            {
+                groupsClass.Members.Add(group.MemberField);
+            }
+
+            var groupsPath = Path.Combine(s.Output, "Groups.cs");
+            WriteNamespace(groupsNamespace, groupsPath);
+            
+            // write each protocol
+            foreach (var protocol in _protocols)
+            {
+                var protocolPath = Path.Combine(s.Output, protocol.Outfile);
+                WriteNamespace(protocol.Namespace, protocolPath);
+            }
+            
+            // write each resource
+            var resources = _target.Resources.GetResources();
+            foreach (var resource in resources)
+            {
+                var resourcePath = Path.Combine(s.Output, resource.Path, resource.Name);
+                resource.Write(resourcePath);
+            }
+        }
     }
 
+    /// <summary>
+    /// CSharp Language Target
+    /// </summary>
     public class CSharpTarget : LanguageTarget
     {
         public override TargetResources Resources { get; }
