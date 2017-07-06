@@ -10,8 +10,11 @@ namespace Krypton.LibProtocol.Target
     {
         protected KryptonFile File { get; }
         
-        protected LanguageTargetContext(KryptonFile file)
+        protected LanguageTarget Target { get; }
+        
+        protected LanguageTargetContext(LanguageTarget target, KryptonFile file)
         {
+            Target = target;
             File = file;
         }
 
@@ -42,6 +45,8 @@ namespace Krypton.LibProtocol.Target
         /// <returns></returns>
         protected abstract ProtocolDefinition CreateProtocolDefinition(Proto.Protocol protocol);
 
+        public abstract TargetResources Resources { get; }
+        
         public LanguageTargetContext Build(KryptonFile file)
         {
             // create our initial context
