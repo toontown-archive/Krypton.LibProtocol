@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Parser;
 
@@ -95,6 +94,12 @@ namespace Krypton.LibProtocol
             // Assign the group an id and add it to our list
             group.Id = Groups.Count + 1;
             Groups.Add(group);
+        }
+
+        internal void AddMessage(Message message)
+        {
+            message.Id = Messages.Count + 1;
+            Messages.Add(message);
         }
 
         /// <summary>

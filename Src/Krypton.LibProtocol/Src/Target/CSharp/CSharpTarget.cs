@@ -1,6 +1,7 @@
 ﻿using Proto = Krypton.LibProtocol.Member;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Krypton.LibProtocol.Target.CSharp
@@ -14,37 +15,62 @@ namespace Krypton.LibProtocol.Target.CSharp
         /// Output file path
         /// </summary>
         public string Output { get; set; }
+        
+        /// <summary>
+        /// Group settings
+        /// </summary>
+        public GroupSettings Groups { get; set; }
+
+        public struct GroupSettings
+        {
+            public string Namespace { get; set; }
+            public string ClassName { get; set; }
+        }
     }
 
     public class CSharpTargetContext : LanguageTargetContext
     {
-        private CodeNamespaceCollection _namespaceCollection;
-        private CodeTypeDeclaration _groups;
+        private IList<CSharpGroupContext> _groups;
+        private IList<CSharpProtocolContext> _protocols;
         
         public CSharpTargetContext(KryptonFile file) : base(file)
         {
-            _namespaceCollection = new CodeNamespaceCollection();
-            
-            var ns = TargetUtil.CreateNamespace("Krypton.Protocol");
-            _groups = TargetUtil.CreateClass("Groups", ns);
-            _namespaceCollection.Add(ns);
+            _groups = new List<CSharpGroupContext>();
+            _protocols = new List<CSharpProtocolContext>();
         }
 
         public override void AddGroupDefinition(GroupDefinitionContext context)
         {
-            var ctx = (CSharpGroupContext) context;
-            _groups.Members.Add(ctx.MemberField);
+            _groups.Add((CSharpGroupContext)context);
         }
 
         public override void AddProtocolDefinition(ProtocolDefinitionContext context)
         {
-            throw new System.NotImplementedException();
+            _protocols.Add((CSharpProtocolContext)context);
         }
 
         public override void Write(TargetSettings settings)
         {
             var s = (CSharpTargetSettings) settings;
             
+            var namespaceCollection = new CodeNamespaceCollection();
+            
+            // create the groups
+            var groupsNamespace = TargetUtil.CreateNamespace(s.Groups.Namespace);
+            var groupsClass = TargetUtil.CreateClass(s.Groups.ClassName, groupsNamespace);
+            foreach (var group in _groups)
+            {
+                groupsClass.Members.Add(group.MemberField);
+            }
+            namespaceCollection.Add(groupsNamespace);
+            
+            // add each protocol
+            foreach (var protocol in _protocols)
+            {
+                namespaceCollection.Add(protocol.Namespace);
+            }
+
+            // generate the code
             var provider = CodeDomProvider.CreateProvider("CSharp");
             var options = new CodeGeneratorOptions
             {
@@ -52,7 +78,7 @@ namespace Krypton.LibProtocol.Target.CSharp
             };
 
             var ccu = new CodeCompileUnit();
-            ccu.Namespaces.AddRange(_namespaceCollection);
+            ccu.Namespaces.AddRange(namespaceCollection);
 
             using (var stream = new StreamWriter(s.Output))
             {
@@ -74,9 +100,10 @@ namespace Krypton.LibProtocol.Target.CSharp
             return new CSharpGroupDefinition(ctx);
         }
 
-        protected override Target.ProtocolDefinition CreateProtocolDefinition(Proto.Protocol protocol)
+        protected override ProtocolDefinition CreateProtocolDefinition(Proto.Protocol protocol)
         {
-            throw new System.NotImplementedException();
+            var ctx = new CSharpProtocolContext(protocol);
+            return new CSharpProtocolDefinition(ctx);
         }
     }
 }

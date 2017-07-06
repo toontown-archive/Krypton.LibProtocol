@@ -14,7 +14,12 @@ namespace Krypton.LibProtocol.TestConsole
             
             var settings = new CSharpTargetSettings
             {
-                Output = "TestOutput.cs"
+                Output = "TestOutput.cs",
+                Groups = new CSharpTargetSettings.GroupSettings
+                {
+                    Namespace = "Krypton.Protocol",
+                    ClassName = "Groups"
+                }
             };
             context.Write(settings);
         }

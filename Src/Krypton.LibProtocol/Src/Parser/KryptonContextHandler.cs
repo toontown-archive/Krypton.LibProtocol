@@ -76,7 +76,7 @@ namespace Krypton.LibProtocol.Parser
         /// <param name="context"></param>
         private void HandleProtocolCtx(KryptonParser.Protocol_definitionContext context)
         {
-            var protocol = new Proto.Protocol(context.ns.GetText(), context.name.Text);
+            var protocol = new Proto.Protocol(context.ns.GetText(), context.name.Text, _file);
             
             // Add the protocol
             KryptonParserException.Context = context.name.Line;
@@ -157,7 +157,7 @@ namespace Krypton.LibProtocol.Parser
         /// </summary>
         /// <param name="container"></param>
         /// <param name="context"></param>
-        private void HandlePacketStatementCtx(Proto.IStatementContainer container, KryptonParser.Packet_statementContext context)
+        private void HandlePacketStatementCtx(Proto.StatementContainer container, KryptonParser.Packet_statementContext context)
         {
             // Data statement
             if (context.datadef != null)

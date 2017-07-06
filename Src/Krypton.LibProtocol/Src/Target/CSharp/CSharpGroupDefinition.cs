@@ -18,9 +18,6 @@ namespace Krypton.LibProtocol.Target.CSharp
         {
         }
         
-        /// <summary>
-        /// Build the definition
-        /// </summary>
         public override void Build()
         {
             var ctx = (CSharpGroupContext) Context;

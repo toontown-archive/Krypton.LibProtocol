@@ -30,5 +30,14 @@ namespace Krypton.LibProtocol.Target.CSharp
             ns.Types.Add(cls);
             return cls;
         }
+        
+        public static CodeTypeDeclaration CreateClass(string name)
+        {
+            var cls = new CodeTypeDeclaration(name)
+            {
+                IsClass = true
+            };
+            return cls;
+        }
     }
 }
