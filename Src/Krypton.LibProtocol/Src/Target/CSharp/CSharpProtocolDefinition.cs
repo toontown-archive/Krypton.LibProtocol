@@ -5,7 +5,9 @@ namespace Krypton.LibProtocol.Target.CSharp
 {
     public class CSharpProtocolContext : ProtocolDefinitionContext
     {
+        public string Outfile { get; }
         public CodeNamespace Namespace { get; }
+
         private CodeTypeDeclaration _protocolDec;
         private CodeTypeDeclaration _messagesDec;
         private CodeTypeDeclaration _packetsDec;
@@ -19,6 +21,9 @@ namespace Krypton.LibProtocol.Target.CSharp
             _protocolDec.Members.Add(_messagesDec);
             _packetsDec = TargetUtil.CreateClass("Packet");
             _protocolDec.Members.Add(_packetsDec);
+
+            var fullname = $"{protocol.Namespace}_{protocol.Name}";
+            Outfile = fullname.Replace('.', '_') + ".cs";
         }
 
         public override void AddMessageDefinition(MessageDefinitionContext context)
