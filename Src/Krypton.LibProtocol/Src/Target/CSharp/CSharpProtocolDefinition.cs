@@ -1,40 +1,32 @@
-﻿using System.CodeDom;
+﻿using System;
+using System.CodeDom;
 using Proto = Krypton.LibProtocol.Member;
 
 namespace Krypton.LibProtocol.Target.CSharp
 {
     public class CSharpProtocolContext : ProtocolDefinitionContext
     {
-        public string Outfile { get; }
-        public CodeNamespace Namespace { get; }
+        public string Outfile { get; internal set; }
+        public CodeNamespace Namespace { get; internal set; }
 
-        private CodeTypeDeclaration _protocolDec;
-        private CodeTypeDeclaration _messagesDec;
-        private CodeTypeDeclaration _packetsDec;
-        
+        public CodeTypeDeclaration ProtocolDec { get; internal set; }
+        public CodeTypeDeclaration MessagesDec { get; internal set; }
+        public CodeTypeDeclaration PacketsDec { get; internal set; }
+
         public CSharpProtocolContext(Proto.Protocol protocol) : base(protocol)
         {
-            Namespace = TargetUtil.CreateNamespace(protocol.Namespace);
-            _protocolDec = TargetUtil.CreateClass(protocol.Name, Namespace);
-            
-            _messagesDec = TargetUtil.CreateClass("Message");
-            _protocolDec.Members.Add(_messagesDec);
-            _packetsDec = TargetUtil.CreateClass("Packet");
-            _protocolDec.Members.Add(_packetsDec);
-
-            var fullname = $"{protocol.Namespace}_{protocol.Name}";
-            Outfile = fullname.Replace('.', '_') + ".cs";
         }
-
+        
         public override void AddMessageDefinition(MessageDefinitionContext context)
         {
             var ctx = (CSharpMessageDefinitionContext) context;
-            _messagesDec.Members.Add(ctx.MemberField);
+            MessagesDec.Members.Add(ctx.MemberField);
         }
 
         public override void AddPacketDefinition(PacketDefinitionContext context)
         {
-            throw new System.NotImplementedException();
+            var ctx = (CSharpPacketDefinitionContext) context;
+            PacketsDec.Members.Add(ctx.Struct);
         }
     }
 
@@ -52,7 +44,27 @@ namespace Krypton.LibProtocol.Target.CSharp
 
         protected override PacketDefinition CreatePacketDefinition(Proto.Packet packet)
         {
-            throw new System.NotImplementedException();
+            var ctx = new CSharpPacketDefinitionContext(packet);
+            return new CSharpPacketDefinition(ctx);
+        }
+
+        public override void Build()
+        {
+            var ctx = (CSharpProtocolContext) Context;
+            
+            ctx.Namespace = TargetUtil.CreateNamespace(ctx.Protocol.Namespace);
+            ctx.ProtocolDec = TargetUtil.CreateClass(ctx.Protocol.Name, ctx.Namespace);
+            
+            ctx.MessagesDec = TargetUtil.CreateClass("Message");
+            ctx.ProtocolDec.Members.Add(ctx.MessagesDec);
+            
+            ctx.PacketsDec = TargetUtil.CreateClass("Packet");
+            ctx.ProtocolDec.Members.Add(ctx.PacketsDec);
+
+            var fullname = $"{ctx.Protocol.Namespace}_{ctx.Protocol.Name}";
+            ctx.Outfile = fullname.Replace('.', '_') + ".cs";
+            
+            base.Build();
         }
     }
 }
