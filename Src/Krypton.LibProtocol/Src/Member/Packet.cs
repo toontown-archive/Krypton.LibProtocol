@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Krypton.LibProtocol.Parser;
 
 namespace Krypton.LibProtocol.Member
@@ -20,7 +21,7 @@ namespace Krypton.LibProtocol.Member
             {
                 throw new KryptonParserException($"Packet {Name} contains parent {parent.Name} more than once.");
             }
-            
+
             Parents.Add(parent);
         }
 
@@ -47,6 +48,21 @@ namespace Krypton.LibProtocol.Member
         {
             // todo: checks
             Statements.Add(statement);
+        }
+
+        public List<IPacketStatement> InheritedStatements
+        {
+            get
+            {
+                var statements = new List<IPacketStatement>();
+
+                foreach (var parent in Parents)
+                {
+                    statements.AddRange(parent.InheritedStatements);
+                    statements.AddRange(parent.Statements);
+                }
+                return statements;
+            }
         }
     }
 }

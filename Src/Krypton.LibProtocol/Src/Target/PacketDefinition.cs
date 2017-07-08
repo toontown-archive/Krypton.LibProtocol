@@ -39,7 +39,10 @@ namespace Krypton.LibProtocol.Target
             var ctx = (PacketDefinitionContext) Context;
             
             // build each statement
-            foreach (var statement in ctx.Packet.Statements)
+            var statements = ctx.Packet.InheritedStatements;
+            statements.AddRange(ctx.Packet.Statements);
+            
+            foreach (var statement in statements)
             {
                 Definition def;
                 var data = statement as Proto.DataStatement;
