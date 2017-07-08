@@ -128,21 +128,31 @@ namespace Krypton.LibProtocol.Parser
             KryptonParserException.Context = context.name.Line;
             container.AddPacket(packet);
             
-            // Add each parent
-            var parents = context.packet_parents()?.packet_parents();
-            if (parents != null)
-                foreach (var parentctx in parents)
+            void HandleParentContext(KryptonParser.Packet_parentsContext parentctx)
+            {
+                KryptonParserException.Context = parentctx.name.Line;
+
+                var parent = _file.ResolveLibraryPacket(parentctx.ns.GetText(), parentctx.name.Text);
+                if (parent == null)
                 {
-                    KryptonParserException.Context = parentctx.name.Line;
-
-                    var parent = _file.ResolveLibraryPacket(parentctx.ns.GetText(), parentctx.name.Text);
-                    if (parent == null)
-                    {
-                        throw new KryptonParserException($"Packet {parentctx.name.Text} does not exist.");
-                    }
-
-                    packet.AddParent(parent);
+                    throw new KryptonParserException($"Packet {parentctx.name.Text} does not exist.");
                 }
+
+                packet.AddParent(parent);
+
+                var nested = parentctx.packet_parents();
+                foreach (var p in nested)
+                {
+                    HandleParentContext(p);
+                }
+            }
+
+            // Add each parent
+            var rootParent = context.packet_parents();
+            if (rootParent != null)
+            {
+                HandleParentContext(rootParent);
+            }
 
             // Handle each statement context
             var statements = context.packet_statement();
