@@ -25,7 +25,14 @@ namespace Krypton.LibProtocol.Target.CSharp
 
         public override void AddConditionalDefinition(ConditionalDefinitionContext context)
         {
-            throw new System.NotImplementedException();
+            var ctx = (CSharpConditionalDefinitionContext) context;
+
+            foreach (var field in ctx.Fields)
+            {
+                Struct.Members.Add(field);
+            }
+            WriteMethod.Statements.Add(ctx.WriteStatement);
+            ReadMethod.Statements.Add(ctx.ReadStatement);
         }
     }
 
