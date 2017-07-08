@@ -6,15 +6,16 @@ namespace Krypton.LibProtocol.TestConsole
     {
         public static void Main(string[] args)
         {
-            var pf = new KryptonFile();
-            pf.Read("Resources/groups.krypton");
+            var pf = new KPDLFile();
+            pf.AddIncludeDirectory("Resources/");
+            pf.Read("example.kpdl");
 
             var target = new CSharpTarget();
             var context = target.Build(pf);
             
             var settings = new CSharpTargetSettings
             {
-                Output = "TestOutput.cs",
+                Output = "Gen",
                 Groups = new CSharpTargetSettings.GroupSettings
                 {
                     Namespace = "Krypton.Protocol",

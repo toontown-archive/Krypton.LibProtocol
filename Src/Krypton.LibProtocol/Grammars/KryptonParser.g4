@@ -3,7 +3,12 @@ parser grammar KryptonParser;
 options 
     { tokenVocab=KryptonTokens; }
 
-init : groups+=group_definition* libraries+=library_definition* protocols+=protocol_definition*;
+// kpdl structure
+init : imports+=import_statement* groups+=group_definition* libraries+=library_definition* protocols+=protocol_definition*
+     ;
+
+import_statement : IMPORT (path=directory)? file=IDENTIFIER '.' KPDL ';'
+                 ;
 
 group_definition : GROUP name=IDENTIFIER ';' ;
 
@@ -34,4 +39,11 @@ conditional_definition : '(' condition ')' '=>'
 condition : val1=condition_value op=OPERATOR val2=condition_value ;
 
 condition_value : TRUE | FALSE | INTEGER | IDENTIFIER ;
-namespace : IDENTIFIER ('.' IDENTIFIER)* ;
+
+// Utility
+
+namespace : IDENTIFIER ('.' IDENTIFIER)* 
+          ;
+
+directory : IDENTIFIER ('/' IDENTIFIER)* '/'
+          ;

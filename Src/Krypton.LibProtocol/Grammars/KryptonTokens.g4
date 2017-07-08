@@ -1,9 +1,11 @@
 lexer grammar KryptonTokens;
 
+IMPORT : 'import' ;
 GROUP : 'group' ;
 LIBRARY : 'library' ;
 PROTOCOL : 'protocol' ;
 PACKET : 'packet' ;
+KPDL : 'kpdl' ;
 
 PRIMITIVE 
   : BYTE 
@@ -57,6 +59,7 @@ LBRACKET : '{' ;
 RBRACKET : '}' ;
 LPAREN : '(' ;
 RPAREN : ')' ;
+FSLASH : '/' ;
 
 IDENTIFIER : [A-Za-z_][A-Za-z_0-9]+ ;
 INTEGER : [0-9]+ ;

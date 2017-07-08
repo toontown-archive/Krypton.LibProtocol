@@ -7,8 +7,9 @@ using Krypton.LibProtocol.Parser;
 
 namespace Krypton.LibProtocol
 {
-    public class KryptonFile
+    public class KPDLFile
     {
+        internal FileResolver Includes { get; }
         internal IList<Group> Groups { get; }
         internal IList<Library> Libraries { get; }
         internal IList<Protocol> Protocols { get; }
@@ -16,8 +17,9 @@ namespace Krypton.LibProtocol
         
         internal IList<string> Files { get; }
 
-        public KryptonFile()
+        public KPDLFile()
         {
+            Includes = new FileResolver();
             Groups = new List<Group>();
             Libraries = new List<Library>();
             Protocols = new List<Protocol>();
@@ -26,6 +28,11 @@ namespace Krypton.LibProtocol
             Files = new List<string>();
         }
 
+        public void AddIncludeDirectory(string directory)
+        {
+            Includes.Directories.Add(directory);
+        }
+        
         internal Library ResolveLibrary(string name)
         {
             return Libraries.FirstOrDefault(library => library.Name == name);
@@ -103,11 +110,12 @@ namespace Krypton.LibProtocol
         }
 
         /// <summary>
-        /// Reads a .krypton file
+        /// Reads a .kpdl file
         /// </summary>
-        /// <param name="filepath">Path to the krypton file</param>
+        /// <param name="filepath">Path to the kpdl file</param>
         public void Read(string filepath)
         {
+            filepath = Includes.Resolve(filepath);
             using (var fs = new FileStream(filepath, FileMode.Open))
             {
                 var inputStream = new AntlrInputStream(fs);

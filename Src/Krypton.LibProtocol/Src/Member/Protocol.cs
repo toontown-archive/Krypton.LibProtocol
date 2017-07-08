@@ -5,11 +5,11 @@ namespace Krypton.LibProtocol.Member
 {
     public class Protocol : PacketContainer
     {
-        public KryptonFile File { get; }
+        public KPDLFile File { get; }
         public string Namespace { get; }
         internal IList<Message> Messages { get; }
         
-        internal Protocol(string ns, string name, KryptonFile file) : base(name)
+        internal Protocol(string ns, string name, KPDLFile file) : base(name)
         {
             File = file;
             Namespace = ns;

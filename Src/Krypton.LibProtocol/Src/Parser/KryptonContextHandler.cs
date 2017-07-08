@@ -1,14 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using Proto = Krypton.LibProtocol.Member;
 
 namespace Krypton.LibProtocol.Parser
 {
     public class KryptonContextHandler
     {
-        private KryptonFile _file;
+        private KPDLFile _file;
         
-        public KryptonContextHandler(KryptonFile file)
+        public KryptonContextHandler(KPDLFile file)
         {
             _file = file;
         }
@@ -19,6 +20,15 @@ namespace Krypton.LibProtocol.Parser
         /// <param name="context"></param>
         public void HandleInitCtx(KryptonParser.InitContext context)
         {
+            // Handle each import
+            foreach (var importctx in context._imports)
+            {
+                var dir = importctx.path?.GetText() ?? "";
+                var filename = importctx.file.Text;
+                var filepath = $"{dir}{filename}.kpdl";
+                _file.Read(filepath);
+            }
+            
             // Handle each group
             foreach (var groupctx in context._groups)
             {

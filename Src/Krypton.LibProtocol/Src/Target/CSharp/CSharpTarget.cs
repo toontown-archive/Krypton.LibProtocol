@@ -35,7 +35,7 @@ namespace Krypton.LibProtocol.Target.CSharp
         private IList<CSharpGroupContext> _groups;
         private IList<CSharpProtocolContext> _protocols;
         
-        public CSharpTargetContext(LanguageTarget target, KryptonFile file) : base(target, file)
+        public CSharpTargetContext(LanguageTarget target, KPDLFile file) : base(target, file)
         {
             _groups = new List<CSharpGroupContext>();
             _protocols = new List<CSharpProtocolContext>();
@@ -118,7 +118,7 @@ namespace Krypton.LibProtocol.Target.CSharp
             Resources = new TargetResources("CSharp");
         }
 
-        protected override LanguageTargetContext CreateLanguageTargetContext(KryptonFile file)
+        protected override LanguageTargetContext CreateLanguageTargetContext(KPDLFile file)
         {
             return new CSharpTargetContext(this, file);
         }

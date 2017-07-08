@@ -1,5 +1,0 @@
-group ClusterMember;
-
-protocol Krypton.Node[Management] {
-    Test
-}

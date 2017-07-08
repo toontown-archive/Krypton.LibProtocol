@@ -6,4 +6,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Krypton.LibProtocol\Krypton.LibProtocol.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Gen\**\*" />
+  </ItemGroup>
 </Project>

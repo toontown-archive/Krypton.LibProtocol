@@ -8,11 +8,11 @@ namespace Krypton.LibProtocol.Target
 
     public abstract class LanguageTargetContext
     {
-        protected KryptonFile File { get; }
+        protected KPDLFile File { get; }
         
         protected LanguageTarget Target { get; }
         
-        protected LanguageTargetContext(LanguageTarget target, KryptonFile file)
+        protected LanguageTargetContext(LanguageTarget target, KPDLFile file)
         {
             Target = target;
             File = file;
@@ -31,7 +31,7 @@ namespace Krypton.LibProtocol.Target
         /// Creates a new LanguageTargetContext instance
         /// </summary>
         /// <returns></returns>
-        protected abstract LanguageTargetContext CreateLanguageTargetContext(KryptonFile file);
+        protected abstract LanguageTargetContext CreateLanguageTargetContext(KPDLFile file);
         
         /// <summary>
         /// Creates a new GroupDefinition instance
@@ -47,7 +47,7 @@ namespace Krypton.LibProtocol.Target
 
         public abstract TargetResources Resources { get; }
         
-        public LanguageTargetContext Build(KryptonFile file)
+        public LanguageTargetContext Build(KPDLFile file)
         {
             // create our initial context
             var context = CreateLanguageTargetContext(file);
