@@ -13,16 +13,15 @@ protocol_definition : PROTOCOL
                       ns=namespace '[' name=IDENTIFIER ']'
                       '{' statements=proto_statements '}' ;
 
-proto_statements : messages=message_definitions? packets+=packet_definition* ;
+proto_statements : messages+=message_definitions packets+=packet_definition* ;
 
-message_definitions: names+=IDENTIFIER 
-                  | message_definitions ',' message_definitions;
+message_definitions : name=IDENTIFIER (',' message_definitions)?
+                    ;
 
 packet_definition : PACKET name=IDENTIFIER (':' parents+=packet_parents)? 
                     '{' statements+=packet_statement+ '}' ;
 
-packet_parents : ns=namespace '[' name=IDENTIFIER ']'
-               | packet_parents ',' packet_parents 
+packet_parents : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parents)?
                ;
 
 packet_statement : datadef=data_definition

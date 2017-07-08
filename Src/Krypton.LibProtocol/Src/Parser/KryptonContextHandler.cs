@@ -85,9 +85,9 @@ namespace Krypton.LibProtocol.Parser
             // Handle each statement defined inside the protocol.
             var statementsctx = context.proto_statements();
 
-            var messages = statementsctx.messages;
-            if (messages != null)
-                HandleMessageCtx(protocol, messages);
+            var message = statementsctx.message_definitions();
+            if (message != null)
+                HandleMessageCtx(protocol, message);
 
             foreach (var packetctx in statementsctx._packets)
             {
@@ -102,17 +102,32 @@ namespace Krypton.LibProtocol.Parser
         /// <param name="context"></param>
         private void HandleMessageCtx(Proto.Protocol container, KryptonParser.Message_definitionsContext context)
         {
-            var names = context._names;
+            var message = new Proto.Message(context.name.Text);
 
-            foreach (var name in names)
+            // Add the message
+            KryptonParserException.Context = context.name.Line;
+            container.AddMessage(message);
+            
+            var nested = context.message_definitions();
+            if (nested != null)
+                HandleMessageCtx(container, nested);
+        }
+
+        private void HandleParentCtx(Proto.Packet packet, KryptonParser.Packet_parentsContext context)
+        {
+            KryptonParserException.Context = context.name.Line;
+
+            var parent = _file.ResolveLibraryPacket(context.ns.GetText(), context.name.Text);
+            if (parent == null)
             {
-                Console.Out.WriteLine(name.Text);
-                var message = new Proto.Message(name.Text);
-
-                // Add the message
-                KryptonParserException.Context = name.Line;
-                container.AddMessage(message);
+                throw new KryptonParserException($"Packet {context.name.Text} does not exist.");
             }
+
+            packet.AddParent(parent);
+
+            var nested = context.packet_parents();
+            if (nested != null)
+                HandleParentCtx(packet, nested);
         }
 
         /// <summary>
@@ -128,31 +143,10 @@ namespace Krypton.LibProtocol.Parser
             KryptonParserException.Context = context.name.Line;
             container.AddPacket(packet);
             
-            void HandleParentContext(KryptonParser.Packet_parentsContext parentctx)
-            {
-                KryptonParserException.Context = parentctx.name.Line;
-
-                var parent = _file.ResolveLibraryPacket(parentctx.ns.GetText(), parentctx.name.Text);
-                if (parent == null)
-                {
-                    throw new KryptonParserException($"Packet {parentctx.name.Text} does not exist.");
-                }
-
-                packet.AddParent(parent);
-
-                var nested = parentctx.packet_parents();
-                foreach (var p in nested)
-                {
-                    HandleParentContext(p);
-                }
-            }
-
             // Add each parent
-            var rootParent = context.packet_parents();
-            if (rootParent != null)
-            {
-                HandleParentContext(rootParent);
-            }
+            var parent = context.packet_parents();
+            if (parent != null)
+                HandleParentCtx(packet, parent);
 
             // Handle each statement context
             var statements = context.packet_statement();
