@@ -5,7 +5,12 @@ GROUP : 'group' ;
 LIBRARY : 'library' ;
 PROTOCOL : 'protocol' ;
 PACKET : 'packet' ;
+DECLARE : 'declare' ;
+META : 'meta' ;
 KPDL : 'kpdl' ;
+RETURN : 'return' ;
+
+ENUMERABLE : 'enumerable' ;
 
 PRIMITIVE 
   : BYTE 
@@ -35,23 +40,24 @@ fragment BUFFER : 'buffer';
 TRUE : 'true' ;
 FALSE : 'false' ;
 
+GREATER : '>' ;
+LESS : '<' ;
+fragment EQUAL : '==' ;
+fragment NOTEQUAL : '!=' ;
+fragment GREATER_OR_EQUAL : '>=' ;
+fragment LESS_OR_EQUAL : '<=' ;
+
 OPERATOR 
   : EQUAL | NOTEQUAL
   | GREATER_OR_EQUAL | GREATER
   | LESS_OR_EQUAL | LESS
   ;
 
-fragment EQUAL : '==' ;
-fragment NOTEQUAL : '!=' ;
-fragment GREATER_OR_EQUAL : '>=' ;
-fragment GREATER : '>' ;
-fragment LESS_OR_EQUAL : '<=' ;
-fragment LESS : '<' ;
-
 DIRECTIVE : '=>' ;
 PERIOD : '.' ;
 COMMA : ',' ;
 COLON : ':' ;
+DOUBLECOLON : '::' ;
 SEMICOLON : ';' ;
 LSBRACKET : '[' ;
 RSBRACKET : ']' ;
@@ -60,8 +66,17 @@ RBRACKET : '}' ;
 LPAREN : '(' ;
 RPAREN : ')' ;
 FSLASH : '/' ;
+LOOPOPERATOR : '..' ;
+fragment PLUSPLUS : '++' ;
 
-IDENTIFIER : [A-Za-z_][A-Za-z_0-9]+ ;
+METAOPERATOR
+    : PLUSPLUS
+    ;
+
+IDENTIFIER 
+    : [A-Za-z_][A-Za-z_0-9]+ 
+    ;
+
 INTEGER : [0-9]+ ;
 
 // skip whitespace
