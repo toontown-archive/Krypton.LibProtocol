@@ -7,6 +7,16 @@ library Krypton {
         uint16 message_type;
         buffer data;
     }
+    
+    declare array<type> {
+        meta {
+            enumerable<string> list;
+        };
+        
+        string val;
+        
+        return list;
+    }
 }
 
 library Flow {
