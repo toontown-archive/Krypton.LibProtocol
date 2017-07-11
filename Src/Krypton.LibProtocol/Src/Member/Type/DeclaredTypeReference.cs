@@ -5,6 +5,7 @@ namespace Krypton.LibProtocol.Member.Type
 {
     public class DeclaredTypeReference : TypeReference
     {
-        public string Name { get; internal set; }
+        public string Library { get; internal set; }
+        public override string Name { get; internal set; }
     }
 }

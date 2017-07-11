@@ -1,20 +1,17 @@
-﻿using Krypton.LibProtocol.Parser;
+﻿using System;
+using Krypton.LibProtocol.Parser;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters;
 using System.Text;
+using Krypton.LibProtocol.Member.Operation;
 
-namespace Krypton.LibProtocol.Target
+namespace Krypton.LibProtocol.Target.CSharp
 {
-    public struct CSharpUnit
-    {
-        public string Path { get; set; }
-        public CodeCompileUnit Unit { get; set; }
-    }
-
     public class CSharpParserListener : BaseParserListener
     {
         private IList<CSharpUnit> _units;
@@ -57,7 +54,7 @@ namespace Krypton.LibProtocol.Target
             
             var container = new CodeTypeDeclaration
             {
-                Name = ActiveProtocol.Name,
+                Name = ActiveProtocol.Name.ToCamelCase(),
                 IsClass = true
             };
 
@@ -94,7 +91,7 @@ namespace Krypton.LibProtocol.Target
             
             var container = new CodeTypeDeclaration
             {
-                Name = ActiveLibrary.Name,
+                Name = ActiveLibrary.Name.ToCamelCase(),
                 IsClass = true
             };
 
@@ -131,7 +128,7 @@ namespace Krypton.LibProtocol.Target
 
             var container = new CodeTypeDeclaration
             {
-                Name = ActivePacket.Name,
+                Name = ActivePacket.Name.ToCamelCase(),
                 IsStruct = true
             };
 
@@ -158,9 +155,30 @@ namespace Krypton.LibProtocol.Target
             
             var container = new CodeTypeDeclaration
             {
-                Name = context.IDENTIFIER().GetText(),
+                Name = context.IDENTIFIER().GetText().ToCamelCase(),
                 IsStruct = true
             };
+            
+            var readMethod = new CodeMemberMethod
+            {
+                Name = "Read",
+                Attributes = MemberAttributes.Public | MemberAttributes.Static,
+                ReturnType = new CodeTypeReference(container.Name)
+            };
+            
+            var writeMethod = new CodeMemberMethod
+            {
+                Name = "Write",
+                Attributes = MemberAttributes.Public | MemberAttributes.Final,
+                
+                Parameters =
+                {
+                    new CodeParameterDeclarationExpression("Krypton.LibProtocol.BufferWriter", "bw")
+                }
+            };
+
+            container.Members.Add(readMethod);
+            container.Members.Add(writeMethod);
             
             var parent = _packetContainers.Peek();
             parent.Members.Add(container);
@@ -175,6 +193,18 @@ namespace Krypton.LibProtocol.Target
             base.ExitType_declaration(context);
         }
 
+        public override void EnterGeneric_type_attributes(KryptonParser.Generic_type_attributesContext context)
+        {
+            base.EnterGeneric_type_attributes(context);
+            
+            var container = _operationContainers.Peek();
+            var readMethod = (CodeMemberMethod)container.Members[0];
+            
+            readMethod.ReturnType = new CodeTypeReference(
+                readMethod.ReturnType + "["
+            );
+        }
+
         public override void EnterGeneric_type_attribute(KryptonParser.Generic_type_attributeContext context)
         {
             base.EnterGeneric_type_attribute(context);
@@ -183,8 +213,47 @@ namespace Krypton.LibProtocol.Target
             container.TypeParameters.Add(
                 new CodeTypeParameter(context.IDENTIFIER().GetText())
                 );
+
+            var readMethod = (CodeMemberMethod)container.Members[0];
+            readMethod.ReturnType = new CodeTypeReference(
+                readMethod.ReturnType + "]"
+            );
+        }
+
+        public override void ExitGeneric_type_attributes(KryptonParser.Generic_type_attributesContext context)
+        {
+            var container = _operationContainers.Peek();
+            var readMethod = (CodeMemberMethod)container.Members[0];
+            
+            readMethod.ReturnType = new CodeTypeReference(
+                readMethod.ReturnType + "]"
+            );
+            
+            base.ExitGeneric_type_attributes(context);
         }
 
         #endregion
+
+        public override void ExitData_statement(KryptonParser.Data_statementContext context)
+        {
+            var operation = (DataOperation) ActiveOperation;
+            
+            var field = new CodeMemberField
+            {
+                Attributes = MemberAttributes.Public | MemberAttributes.Final,
+                Name = operation.Name.ToCamelCase(),
+                Type = operation.Type.AsTypeReference()
+            };
+            field.Name += " { get; set; }//";
+
+            var container = _operationContainers.Peek();
+            container.Members.Add(field);
+            
+            base.ExitData_statement(context);
+        }
+    }
+
+    public static class CSharpExtensions
+    {
     }
 }

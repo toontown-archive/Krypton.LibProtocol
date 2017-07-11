@@ -2,6 +2,6 @@
 {
     public class GenericAttributeReference : TypeReference
     {
-        public string Name { get; internal set; }
+        public override string Name { get; internal set; }
     }
 }

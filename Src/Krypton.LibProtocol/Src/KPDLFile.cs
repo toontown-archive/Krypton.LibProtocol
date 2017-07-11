@@ -5,6 +5,7 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using Krypton.LibProtocol.Parser;
 using Krypton.LibProtocol.Target;
+using Krypton.LibProtocol.Target.CSharp;
 
 namespace Krypton.LibProtocol
 {

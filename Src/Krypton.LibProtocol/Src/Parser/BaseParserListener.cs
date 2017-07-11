@@ -140,7 +140,10 @@ namespace Krypton.LibProtocol.Parser
         
         public override void EnterData_statement(KryptonParser.Data_statementContext context)
         {
-            var operation = new DataOperation();
+            var operation = new DataOperation
+            {
+                Name = context.IDENTIFIER().GetText()
+            };
             _typeContainers.Push(operation);
             
             var container = _operationContainers.Peek();

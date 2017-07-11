@@ -20,5 +20,11 @@
     public class PrimitiveTypeReference : TypeReference
     {
         public Primitive Type { get; internal set; }
+
+        public override string Name
+        {
+            get => $"Krypton{Type}";
+            internal set { }
+        }
     }
 }
