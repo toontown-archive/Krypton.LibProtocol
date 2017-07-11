@@ -3,7 +3,7 @@ using Krypton.LibProtocol.Member.Operation;
 
 namespace Krypton.LibProtocol.Member.Type
 {
-    public class TypeDeclaration : IOperationContainer, ITypeNameContainer
+    public class TypeDeclaration : IOperationContainer
     {
         public TypeName Name { get; internal set; }
         public IList<OperationBase> Operations { get; }
@@ -16,11 +16,6 @@ namespace Krypton.LibProtocol.Member.Type
         public void AddOperation(OperationBase operation)
         {
             Operations.Add(operation);
-        }
-
-        public void AddTypeName(TypeName typeName)
-        {
-            Name = typeName;
         }
     }
 }

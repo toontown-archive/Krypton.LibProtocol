@@ -36,32 +36,41 @@ packet_parent : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parent)?
 // Types
 
 type_reference 
-    : PRIMITIVE
+    : primitive_type_reference
+    | generic_attribute_reference
     | declared_type_reference
-    ;
-    
-declared_type_reference
-    : IDENTIFIER
     | declared_generic_type_reference
     ;
     
+primitive_type_reference
+    : PRIMITIVE
+    ;
+    
+generic_attribute_reference
+    : IDENTIFIER
+    ;
+
+declared_type_reference
+    : namespace '::' IDENTIFIER
+    ;
+    
 declared_generic_type_reference
-    : IDENTIFIER '<' type_reference (',' type_reference)* '>'
+    : namespace '::' IDENTIFIER '<' type_reference (',' type_reference)* '>'
     ;
 
 // Type declaration
 
 type_declaration 
-    : DECLARE type_name '{' meta_declaration? operation_statement+ return_statement '}'
+    : DECLARE IDENTIFIER generic_type_attributes? '{' meta_declaration? operation_statement+ '}'
     ;
  
-type_name 
-    : generic_type_name
-    | IDENTIFIER
-    ;
         
-generic_type_name
-    : IDENTIFIER '<' type_name (',' type_name)* '>'
+generic_type_attributes
+    : '<' generic_type_attribute (',' generic_type_attribute)* '>'
+    ;
+
+generic_type_attribute
+    : IDENTIFIER
     ;
 
 enumerable_declaration
@@ -74,10 +83,6 @@ meta_statement
 
 meta_declaration
     : META '{' meta_statement+ '}' ';'
-    ;
-
-return_statement
-    : RETURN IDENTIFIER ';'
     ;
 
 // Operation statements

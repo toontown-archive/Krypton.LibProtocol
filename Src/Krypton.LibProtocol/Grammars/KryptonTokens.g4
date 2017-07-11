@@ -8,7 +8,6 @@ PACKET : 'packet' ;
 DECLARE : 'declare' ;
 META : 'meta' ;
 KPDL : 'kpdl' ;
-RETURN : 'return' ;
 
 ENUMERABLE : 'enumerable' ;
 

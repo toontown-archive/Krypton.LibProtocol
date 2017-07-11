@@ -4,6 +4,7 @@ using System.Linq;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using Krypton.LibProtocol.Parser;
+using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol
 {
@@ -11,11 +12,13 @@ namespace Krypton.LibProtocol
     {
         public IList<string> Files { get; }
         public FileResolver Includes { get; }
+        public IList<string> Groups { get; }
         
         public KPDLFile()
         {
             Files = new List<string>();
             Includes = new FileResolver();
+            Groups = new List<string>();
         }
 
         /// <summary> 
@@ -31,13 +34,19 @@ namespace Krypton.LibProtocol
                 var lexer = new KryptonTokens(inputStream); 
                 var tokens = new CommonTokenStream(lexer); 
                 var parser = new KryptonParser(tokens);
-                var listener = new KryptonParserListener(this); 
+                var listener = new CSharpParserListener(this); 
                 
                 var walker = new ParseTreeWalker();
                 walker.Walk(listener, parser.init());
+                listener.WriteUnits();
             } 
  
             Files.Append(Path.GetFileName(filepath)); 
-        } 
+        }
+
+        internal void AddGroup(string group)
+        {
+            Groups.Add(group);
+        }
     }
 }
