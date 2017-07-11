@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Krypton.LibProtocol.Type;
 
 namespace Krypton.LibProtocol
 {
@@ -203,6 +204,13 @@ namespace Krypton.LibProtocol
         {
             var x = ReadUInt8();
             return x == 1;
+        }
+
+        public T ReadType<T>() where T: KryptonType<T>, new()
+        {
+            var inst = new T();
+            inst.Consume(this);
+            return inst;
         }
 
         public void SkipBytes(int n)
