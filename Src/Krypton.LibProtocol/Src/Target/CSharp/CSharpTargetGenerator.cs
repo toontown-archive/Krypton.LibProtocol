@@ -1,134 +1,99 @@
-﻿using System;
-using Krypton.LibProtocol.Parser;
-using System.CodeDom;
+﻿using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters;
-using System.Text;
+using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Operation;
+using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Target.CSharp
 {
-    public class CSharpParserListener : BaseParserListener
+    public class CSharpTargetGenerator : LanguageTargetGenerator<CSharpTargetGenerator>
     {
-        private IList<CSharpUnit> _units;
+        protected new IList<CSharpTargetUnit> Units => (IList<CSharpTargetUnit>) base.Units;
+        
         private Stack<CodeTypeDeclaration> _packetContainers;
         private Stack<CodeTypeDeclaration> _operationContainers;
         
-        public CSharpParserListener(KPDLFile file) : base(file)
+        protected override void Initialize(KPDLFile file, ILanguageTargetSettings settings)
         {
-            _units = new List<CSharpUnit>();
             _packetContainers = new Stack<CodeTypeDeclaration>();
             _operationContainers = new Stack<CodeTypeDeclaration>();
         }
 
-        public void WriteUnits()
-        {
-            var provider = CodeDomProvider.CreateProvider("CSharp");
-            var options = new CodeGeneratorOptions
-            {
-                BracingStyle = "C"
-            };
-            
-            foreach (var unit in _units)
-            {
-                var path = Path.Combine("Gen/", unit.Path);
-                using (var fs = new FileStream(path, FileMode.Create))
-                {
-                    using (var stream = new StreamWriter(fs))
-                    {
-                        provider.GenerateCodeFromCompileUnit(unit.Unit, stream, options);
-                    }
-                }
-            }
-        }
-
         #region Protocol Definition
         
-        public override void EnterProtocol_definition(KryptonParser.Protocol_definitionContext context)
+        protected override void EnterProtocol(Protocol protocol)
         {
-            base.EnterProtocol_definition(context);
-            
             var container = new CodeTypeDeclaration
             {
-                Name = ActiveProtocol.Name.ToCamelCase(),
+                Name = protocol.Name.ToCamelCase(),
                 IsClass = true
             };
 
-            var fullname = $"{ActiveProtocol.Namespace}_{ActiveProtocol.Name}";
+            var fullname = $"{protocol.Namespace}_{protocol.Name}";
             var outfile = fullname.Replace('.', '_') + ".cs";
             
-            var unit = new CSharpUnit
+            var unit = new CSharpTargetUnit
             {
                 Path = outfile,
                 Unit = new CodeCompileUnit()
             };
-            _units.Add(unit);
+            Units.Add(unit);
                 
             _packetContainers.Push(container);
         }
 
-        public override void ExitProtocol_definition(KryptonParser.Protocol_definitionContext context)
+        protected override void ExitProtocol(Protocol protocol)
         {
-            var ns = new CodeNamespace(ActiveProtocol.Namespace);
+            var ns = new CodeNamespace(protocol.Namespace);
             ns.Types.Add(_packetContainers.Pop());
 
-            _units[_units.Count-1].Unit.Namespaces.Add(ns);
-            
-            base.ExitProtocol_definition(context);
+            Units[Units.Count-1].Unit.Namespaces.Add(ns);
         }
-        
+
         #endregion
         
         #region Library Definition
-        
-        public override void EnterLibrary_definition(KryptonParser.Library_definitionContext context)
+
+        protected override void EnterLibrary(Library library)
         {
-            base.EnterLibrary_definition(context);
-            
             var container = new CodeTypeDeclaration
             {
-                Name = ActiveLibrary.Name.ToCamelCase(),
+                Name = library.Name.ToCamelCase(),
                 IsClass = true
             };
 
-            var fullname = $"krypton_library_{ActiveLibrary.Name}";
+            var fullname = $"krypton_library_{library.Name}";
             var outfile = fullname.Replace('.', '_') + ".cs";
             
-            var unit = new CSharpUnit
+            var unit = new CSharpTargetUnit
             {
                 Path = outfile,
                 Unit = new CodeCompileUnit()
             };
-            _units.Add(unit);
+            Units.Add(unit);
             
             _packetContainers.Push(container);
         }
 
-        public override void ExitLibrary_definition(KryptonParser.Library_definitionContext context)
+        protected override void ExitLibrary(Library library)
         {
             var ns = new CodeNamespace("Krypton.Library");
             ns.Types.Add(_packetContainers.Pop());
 
-            _units[_units.Count-1].Unit.Namespaces.Add(ns);
-            
-            base.ExitLibrary_definition(context);
+            Units[Units.Count-1].Unit.Namespaces.Add(ns);
         }
-        
+
         #endregion
 
         #region Packet Definition
 
-        public override void EnterPacket_definition(KryptonParser.Packet_definitionContext context)
+        protected override void EnterPacket(Packet packet)
         {
-            base.EnterPacket_definition(context);
-
             var container = new CodeTypeDeclaration
             {
-                Name = ActivePacket.Name.ToCamelCase(),
+                Name = packet.Name.ToCamelCase(),
                 IsStruct = true
             };
 
@@ -138,22 +103,18 @@ namespace Krypton.LibProtocol.Target.CSharp
             _operationContainers.Push(container);
         }
 
-        public override void ExitPacket_definition(KryptonParser.Packet_definitionContext context)
+        protected override void ExitPacket(Packet packet)
         {
             _operationContainers.Pop();
-            
-            base.ExitPacket_definition(context);
         }
 
         #endregion
 
         #region Type Declaration
 
-        public override void EnterType_declaration(KryptonParser.Type_declarationContext context)
+        protected override void EnterTypeDeclaration(TypeDeclaration declaration)
         {
-            base.EnterType_declaration(context);
-
-            var name = context.IDENTIFIER().GetText().ToCamelCase();
+            var name = declaration.Name.Name.ToCamelCase();
             var container = new CodeTypeDeclaration
             {
                 Name = name,
@@ -198,35 +159,28 @@ namespace Krypton.LibProtocol.Target.CSharp
             _operationContainers.Push(container);
         }
 
-        public override void ExitType_declaration(KryptonParser.Type_declarationContext context)
+        protected override void ExitTypeDeclaration(TypeDeclaration declaration)
         {
             _operationContainers.Pop();
-            
-            base.ExitType_declaration(context);
         }
 
-        public override void EnterGeneric_type_attribute(KryptonParser.Generic_type_attributeContext context)
+        protected override void AcquireGenericTypeAttribute(string attributeName)
         {
-            base.EnterGeneric_type_attribute(context);
-
             var container = _operationContainers.Peek();
-            var typeName = context.IDENTIFIER().GetText();
             
             container.TypeParameters.Add(
-                new CodeTypeParameter(typeName)
-                );
+                new CodeTypeParameter(attributeName)
+            );
 
             container.BaseTypes[0].TypeArguments[0].TypeArguments.Add(
-                new CodeTypeReference(typeName)
-                );
+                new CodeTypeReference(attributeName)
+            );
         }
 
         #endregion
 
-        public override void ExitData_statement(KryptonParser.Data_statementContext context)
+        protected override void AcquireDataOperation(DataOperation operation)
         {
-            var operation = (DataOperation) ActiveOperation;
-            
             var field = new CodeMemberField
             {
                 Attributes = MemberAttributes.Public | MemberAttributes.Final,
@@ -237,12 +191,26 @@ namespace Krypton.LibProtocol.Target.CSharp
 
             var container = _operationContainers.Peek();
             container.Members.Add(field);
-            
-            base.ExitData_statement(context);
         }
-    }
 
-    public static class CSharpExtensions
-    {
+        protected override void WriteUnit(ILanguageTargetUnit unit)
+        {
+            var target = (CSharpTargetUnit) unit;
+            
+            var provider = CodeDomProvider.CreateProvider("CSharp");
+            var options = new CodeGeneratorOptions
+            {
+                BracingStyle = "C"
+            };
+        
+            var path = Path.Combine("Gen/", target.Path);
+            using (var fs = new FileStream(path, FileMode.Create))
+            {
+                using (var stream = new StreamWriter(fs))
+                {
+                    provider.GenerateCodeFromCompileUnit(target.Unit, stream, options);
+                }
+            }
+        }
     }
 }
