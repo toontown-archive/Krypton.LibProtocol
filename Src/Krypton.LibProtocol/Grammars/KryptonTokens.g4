@@ -17,6 +17,7 @@ PRIMITIVE
   | INT64 | UINT64
   | STRING | CSTRING
   | BUFFER
+  | ARRAY
   ;
 
 fragment BYTE : 'byte' ;
@@ -32,6 +33,7 @@ fragment UINT64 : 'uint64' ;
 fragment STRING : 'string' ;
 fragment CSTRING : 'cstring' ;
 fragment BUFFER : 'buffer';
+fragment ARRAY : 'array' ;
 
 TRUE : 'true' ;
 FALSE : 'false' ;

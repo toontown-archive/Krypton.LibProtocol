@@ -37,17 +37,18 @@ packet_parent : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parent)?
 
 type_reference 
     : primitive_type_reference
-    | generic_attribute_reference
+    | primitive_generic_type_reference
     | declared_type_reference
     | declared_generic_type_reference
+    | generic_attribute_reference
     ;
     
 primitive_type_reference
     : PRIMITIVE
     ;
     
-generic_attribute_reference
-    : IDENTIFIER
+primitive_generic_type_reference
+    : PRIMITIVE '<' type_reference (',' type_reference)* '>'
     ;
 
 declared_type_reference
@@ -56,6 +57,10 @@ declared_type_reference
     
 declared_generic_type_reference
     : namespace '::' IDENTIFIER '<' type_reference (',' type_reference)* '>'
+    ;
+
+generic_attribute_reference
+    : IDENTIFIER
     ;
 
 // Type declaration
