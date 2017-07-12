@@ -120,6 +120,25 @@ namespace Krypton.LibProtocol.Parser
             _typeContainers.Pop();
         }
 
+        public override void EnterPrimitive_generic_type_reference(KryptonParser.Primitive_generic_type_referenceContext context)
+        {
+            var parent = _typeContainers.Peek();
+            var type = new GenericPrimitiveTypeReference
+            {
+                Type = (Primitive) Enum.Parse(typeof(Primitive), context.PRIMITIVE().GetText(), true)
+            };
+
+            parent.AcquireTypeReference(type);
+            _typeContainers.Push(type);
+
+            ActiveTypeReference = type;
+        }
+
+        public override void ExitPrimitive_generic_type_reference(KryptonParser.Primitive_generic_type_referenceContext context)
+        {
+            _typeContainers.Pop();
+        }
+        
         public override void EnterGeneric_attribute_reference(KryptonParser.Generic_attribute_referenceContext context)
         {
             var parent = _typeContainers.Peek();

@@ -14,7 +14,8 @@
         UInt64,
         String,
         CString,
-        Buffer
+        Buffer,
+        Array
     }
     
     public class PrimitiveTypeReference : TypeReference
