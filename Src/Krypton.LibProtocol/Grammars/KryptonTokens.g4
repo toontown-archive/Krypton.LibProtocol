@@ -6,10 +6,7 @@ LIBRARY : 'library' ;
 PROTOCOL : 'protocol' ;
 PACKET : 'packet' ;
 DECLARE : 'declare' ;
-META : 'meta' ;
 KPDL : 'kpdl' ;
-
-ENUMERABLE : 'enumerable' ;
 
 PRIMITIVE 
   : BYTE 

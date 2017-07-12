@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Operation;
-using Krypton.LibProtocol.Member.Operation.Meta;
 using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Parser
@@ -153,23 +152,6 @@ namespace Krypton.LibProtocol.Parser
         }
 
         public override void ExitData_statement(KryptonParser.Data_statementContext context)
-        {
-            _typeContainers.Pop();
-        }
-
-        public override void EnterEnumerable_declaration(KryptonParser.Enumerable_declarationContext context)
-        {
-            var parent = _operationContainers.Peek();
-
-            var operation = new EnumerableOperation();
-            parent.AddOperation(operation);
-            
-            _typeContainers.Push(operation);
-
-            ActiveOperation = operation;
-        }
-
-        public override void ExitEnumerable_declaration(KryptonParser.Enumerable_declarationContext context)
         {
             _typeContainers.Pop();
         }

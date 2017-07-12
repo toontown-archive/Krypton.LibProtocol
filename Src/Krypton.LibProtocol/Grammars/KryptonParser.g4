@@ -61,7 +61,7 @@ declared_generic_type_reference
 // Type declaration
 
 type_declaration 
-    : DECLARE IDENTIFIER generic_type_attributes? '{' meta_declaration? operation_statement+ '}'
+    : DECLARE IDENTIFIER generic_type_attributes? '{' operation_statement+ '}'
     ;
  
         
@@ -71,18 +71,6 @@ generic_type_attributes
 
 generic_type_attribute
     : IDENTIFIER
-    ;
-
-enumerable_declaration
-    : ENUMERABLE '<' type_reference '>' IDENTIFIER ';'
-    ;
-
-meta_statement
-    : enumerable_declaration
-    ;
-
-meta_declaration
-    : META '{' meta_statement+ '}' ';'
     ;
 
 // Operation statements
