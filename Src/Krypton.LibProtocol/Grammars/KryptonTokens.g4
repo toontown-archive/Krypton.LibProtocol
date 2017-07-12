@@ -6,6 +6,7 @@ LIBRARY : 'library' ;
 PROTOCOL : 'protocol' ;
 PACKET : 'packet' ;
 DECLARE : 'declare' ;
+THIS : 'this' ;
 KPDL : 'kpdl' ;
 
 PRIMITIVE 

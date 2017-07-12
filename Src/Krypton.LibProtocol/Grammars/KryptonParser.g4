@@ -31,7 +31,7 @@ packet_definition : PACKET name=IDENTIFIER (':' packet_parent)?
                     '{' operation_statement+ '}' ;
 
 packet_parent : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parent)?
-               ;
+              ;
 
 // Types
 
@@ -40,6 +40,8 @@ type_reference
     | primitive_generic_type_reference
     | declared_type_reference
     | declared_generic_type_reference
+    | local_type_reference
+    | local_generic_type_reference
     | generic_attribute_reference
     ;
 
@@ -57,6 +59,14 @@ declared_type_reference
     
 declared_generic_type_reference
     : namespace '::' IDENTIFIER '<' type_reference (',' type_reference)* '>'
+    ;
+    
+local_type_reference
+    : THIS '::' IDENTIFIER
+    ;
+    
+local_generic_type_reference
+    : THIS '::' IDENTIFIER '<' type_reference (',' type_reference)* '>'
     ;
 
 generic_attribute_reference
