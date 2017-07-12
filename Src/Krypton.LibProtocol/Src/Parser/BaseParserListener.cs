@@ -29,7 +29,9 @@ namespace Krypton.LibProtocol.Parser
             var dir = context.path?.GetText() ?? "";
             var filename = context.file.Text;
             var filepath = $"{dir}{filename}.kpdl";
-            File.Read(filepath);
+            
+            var ctx = File.GenerateContext(filepath);
+            ctx.Build(this);
         }
 
         #region Type Declaration

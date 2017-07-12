@@ -8,7 +8,7 @@ namespace Krypton.LibProtocol.TestConsole
         {
             var pf = new KPDLFile();
             pf.Includes.Directories.Add("Resources/");
-            pf.Read("example.kpdl");
+            pf.Load("example.kpdl");
             
             var settings = new CSharpTargetSettings();
             CSharpTargetGenerator.Generate(pf, settings);

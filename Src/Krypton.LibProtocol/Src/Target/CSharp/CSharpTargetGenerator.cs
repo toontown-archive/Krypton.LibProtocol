@@ -1,4 +1,5 @@
-﻿using System.CodeDom;
+﻿using System;
+using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
@@ -8,15 +9,15 @@ using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Target.CSharp
 {
-    public class CSharpTargetGenerator : LanguageTargetGenerator<CSharpTargetGenerator>
+    public class CSharpTargetGenerator : LanguageTargetGenerator<CSharpTargetGenerator, CSharpTargetUnit, CSharpTargetSettings>
     {
-        protected new IList<CSharpTargetUnit> Units => (IList<CSharpTargetUnit>) base.Units;
-        
         private Stack<CodeTypeDeclaration> _packetContainers;
         private Stack<CodeTypeDeclaration> _operationContainers;
         
-        protected override void Initialize(KPDLFile file, ILanguageTargetSettings settings)
+        protected override void Initialize(KPDLFile file, CSharpTargetSettings settings)
         {
+            base.Initialize(file, settings);
+            
             _packetContainers = new Stack<CodeTypeDeclaration>();
             _operationContainers = new Stack<CodeTypeDeclaration>();
         }
@@ -193,22 +194,20 @@ namespace Krypton.LibProtocol.Target.CSharp
             container.Members.Add(field);
         }
 
-        protected override void WriteUnit(ILanguageTargetUnit unit)
+        protected override void WriteUnit(CSharpTargetUnit unit)
         {
-            var target = (CSharpTargetUnit) unit;
-            
             var provider = CodeDomProvider.CreateProvider("CSharp");
             var options = new CodeGeneratorOptions
             {
                 BracingStyle = "C"
             };
         
-            var path = Path.Combine("Gen/", target.Path);
+            var path = Path.Combine("Gen/", unit.Path);
             using (var fs = new FileStream(path, FileMode.Create))
             {
                 using (var stream = new StreamWriter(fs))
                 {
-                    provider.GenerateCodeFromCompileUnit(target.Unit, stream, options);
+                    provider.GenerateCodeFromCompileUnit(unit.Unit, stream, options);
                 }
             }
         }

@@ -1,25 +1,28 @@
-﻿using System.Collections.Generic;
-using Antlr4.Runtime.Tree;
+﻿using System;
+using System.Collections.Generic;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Operation;
 using Krypton.LibProtocol.Member.Type;
 using Krypton.LibProtocol.Parser;
+using Krypton.LibProtocol.Target.CSharp;
 
 namespace Krypton.LibProtocol.Target
 {
-    public abstract class LanguageTargetGenerator<T> : BaseParserListener 
-        where T: LanguageTargetGenerator<T>, new()
+    public abstract class LanguageTargetGenerator<T, TU, TS> : BaseParserListener 
+        where T: LanguageTargetGenerator<T, TU, TS>, new()
+        where TU: ILanguageTargetUnit
+        where TS: ILanguageTargetSettings
     {
-        protected IList<ILanguageTargetUnit> Units { get; set; }
+        protected IList<TU> Units { get; set; }
         
-        protected ILanguageTargetSettings Settings { get; set; }
+        protected TS Settings { get; set; }
         
-        protected virtual void Initialize(KPDLFile file, ILanguageTargetSettings settings)
+        protected virtual void Initialize(KPDLFile file, TS settings)
         {
             base.Initialize(file);
             
             Settings = settings;
-            Units = new List<ILanguageTargetUnit>();
+            Units = new List<TU>();
         }
 
         public override void EnterProtocol_definition(KryptonParser.Protocol_definitionContext context)
@@ -121,17 +124,16 @@ namespace Krypton.LibProtocol.Target
 
         protected abstract void AcquireDataOperation(DataOperation operation);
 
-        protected abstract void WriteUnit(ILanguageTargetUnit unit);
+        protected abstract void WriteUnit(TU unit);
         
-        public static void Generate(KPDLFile file, ILanguageTargetSettings settings)
+        public static void Generate(KPDLFile file, TS settings)
         {
             var generator = new T();
             generator.Initialize(file, settings);
-
+            
             foreach (var context in file.Contexts)
             {
-                var walker = new ParseTreeWalker();
-                walker.Walk(generator, context.Context);
+                context.Build(generator);
             }
 
             foreach (var unit in generator.Units)
