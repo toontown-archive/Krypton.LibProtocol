@@ -14,8 +14,8 @@ namespace Krypton.LibProtocol.Parser
         protected Stack<IOperationContainer> OperationContainers;
         protected Stack<ITypeContainer> TypeContainers;
         protected Stack<TypeName> TypeNames;
-        
-        protected BaseParserListener(KPDLFile file)
+
+        protected void Initialize(KPDLFile file)
         {
             File = file;
             PacketContainers = new Stack<IPacketContainer>();

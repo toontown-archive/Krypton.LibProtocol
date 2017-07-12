@@ -9,15 +9,20 @@ using Krypton.LibProtocol.Target.CSharp;
 
 namespace Krypton.LibProtocol
 {
+    public struct ParserContext
+    {
+        public KryptonParser.InitContext Context { get; set; }
+    }
+
     public class KPDLFile
     {
-        public IList<string> Files { get; }
+        public IList<ParserContext> Contexts { get; }
         public FileResolver Includes { get; }
         public IList<string> Groups { get; }
         
         public KPDLFile()
         {
-            Files = new List<string>();
+            Contexts = new List<ParserContext>();
             Includes = new FileResolver();
             Groups = new List<string>();
         }
@@ -35,14 +40,13 @@ namespace Krypton.LibProtocol
                 var lexer = new KryptonTokens(inputStream); 
                 var tokens = new CommonTokenStream(lexer); 
                 var parser = new KryptonParser(tokens);
-                var listener = new CSharpParserListener(this); 
                 
-                var walker = new ParseTreeWalker();
-                walker.Walk(listener, parser.init());
-                listener.WriteUnits();
-            } 
- 
-            Files.Append(Path.GetFileName(filepath)); 
+                var context = new ParserContext
+                {
+                    Context = parser.init()
+                };
+                Contexts.Append(context);
+            }
         }
 
         internal void AddGroup(string group)

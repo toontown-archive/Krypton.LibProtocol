@@ -42,7 +42,7 @@ type_reference
     | declared_generic_type_reference
     | generic_attribute_reference
     ;
-    
+
 primitive_type_reference
     : PRIMITIVE
     ;
