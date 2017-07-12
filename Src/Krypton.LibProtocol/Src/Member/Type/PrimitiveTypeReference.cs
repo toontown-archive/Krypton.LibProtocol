@@ -23,7 +23,7 @@
 
         public override string Name
         {
-            get => $"Krypton{Type}";
+            get => $"{Type}Type";
             internal set { }
         }
     }

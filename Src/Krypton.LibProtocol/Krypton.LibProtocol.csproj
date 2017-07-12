@@ -12,6 +12,5 @@
     <Folder Include="Grammars\Gen\Krypton\LibProtocol\Parser" />
     <Compiler Remove="Targets\**\*" />
     <EmbeddedResource Include="Targets\CSharp\Src\**\*" />
-    <Folder Remove="Targets" />
   </ItemGroup>
 </Project>

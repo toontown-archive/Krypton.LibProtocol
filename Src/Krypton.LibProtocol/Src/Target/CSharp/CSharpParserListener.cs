@@ -36,7 +36,7 @@ namespace Krypton.LibProtocol.Target.CSharp
             foreach (var unit in _units)
             {
                 var path = Path.Combine("Gen/", unit.Path);
-                using (var fs = new FileStream(path, FileMode.OpenOrCreate))
+                using (var fs = new FileStream(path, FileMode.Create))
                 {
                     using (var stream = new StreamWriter(fs))
                     {
@@ -152,24 +152,36 @@ namespace Krypton.LibProtocol.Target.CSharp
         public override void EnterType_declaration(KryptonParser.Type_declarationContext context)
         {
             base.EnterType_declaration(context);
-            
+
+            var name = context.IDENTIFIER().GetText().ToCamelCase();
             var container = new CodeTypeDeclaration
             {
-                Name = context.IDENTIFIER().GetText().ToCamelCase(),
-                IsStruct = true
+                Name = name,
+                IsClass = true,
+                BaseTypes =
+                {
+                    new CodeTypeReference("Krypton.LibProtocol.Type.KryptonType")
+                    {
+                        TypeArguments = { new CodeTypeReference(name) }
+                    }
+                }
             };
-            
-            var readMethod = new CodeMemberMethod
+
+            var consumeMethod = new CodeMemberMethod
             {
-                Name = "Read",
-                Attributes = MemberAttributes.Public | MemberAttributes.Static,
-                ReturnType = new CodeTypeReference(container.Name)
+                Name = "Consume",
+                Attributes = MemberAttributes.Public | MemberAttributes.Override,
+
+                Parameters =
+                {
+                    new CodeParameterDeclarationExpression("Krypton.LibProtocol.BufferReader", "br")
+                }
             };
-            
+
             var writeMethod = new CodeMemberMethod
             {
                 Name = "Write",
-                Attributes = MemberAttributes.Public | MemberAttributes.Final,
+                Attributes = MemberAttributes.Public | MemberAttributes.Override,
                 
                 Parameters =
                 {
@@ -177,7 +189,7 @@ namespace Krypton.LibProtocol.Target.CSharp
                 }
             };
 
-            container.Members.Add(readMethod);
+            container.Members.Add(consumeMethod);
             container.Members.Add(writeMethod);
             
             var parent = _packetContainers.Peek();
@@ -193,43 +205,20 @@ namespace Krypton.LibProtocol.Target.CSharp
             base.ExitType_declaration(context);
         }
 
-        public override void EnterGeneric_type_attributes(KryptonParser.Generic_type_attributesContext context)
-        {
-            base.EnterGeneric_type_attributes(context);
-            
-            var container = _operationContainers.Peek();
-            var readMethod = (CodeMemberMethod)container.Members[0];
-            
-            readMethod.ReturnType = new CodeTypeReference(
-                readMethod.ReturnType + "["
-            );
-        }
-
         public override void EnterGeneric_type_attribute(KryptonParser.Generic_type_attributeContext context)
         {
             base.EnterGeneric_type_attribute(context);
 
             var container = _operationContainers.Peek();
+            var typeName = context.IDENTIFIER().GetText();
+            
             container.TypeParameters.Add(
-                new CodeTypeParameter(context.IDENTIFIER().GetText())
+                new CodeTypeParameter(typeName)
                 );
 
-            var readMethod = (CodeMemberMethod)container.Members[0];
-            readMethod.ReturnType = new CodeTypeReference(
-                readMethod.ReturnType + "]"
-            );
-        }
-
-        public override void ExitGeneric_type_attributes(KryptonParser.Generic_type_attributesContext context)
-        {
-            var container = _operationContainers.Peek();
-            var readMethod = (CodeMemberMethod)container.Members[0];
-            
-            readMethod.ReturnType = new CodeTypeReference(
-                readMethod.ReturnType + "]"
-            );
-            
-            base.ExitGeneric_type_attributes(context);
+            container.BaseTypes[0].TypeArguments[0].TypeArguments.Add(
+                new CodeTypeReference(typeName)
+                );
         }
 
         #endregion
