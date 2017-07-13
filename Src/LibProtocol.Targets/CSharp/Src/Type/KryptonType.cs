@@ -19,10 +19,7 @@ namespace Krypton.LibProtocol.Type
                 skipVisibility: true);
  
             var ilGen = method.GetILGenerator();
-            var temp = ilGen.DeclareLocal(newExpr.Type);
-            ilGen.Emit(OpCodes.Ldloca, temp);
-            ilGen.Emit(OpCodes.Initobj, newExpr.Type);
-            ilGen.Emit(OpCodes.Ldloc, temp);
+            ilGen.Emit(OpCodes.Newobj, newExpr.Constructor);
             ilGen.Emit(OpCodes.Ret);
  
             return (Func<TK>)method.CreateDelegate(typeof(Func<TK>));
