@@ -206,13 +206,6 @@ namespace Krypton.LibProtocol
             return x == 1;
         }
 
-        public T ReadType<T>() where T: KryptonType<T>, new()
-        {
-            var inst = new T();
-            inst.Consume(this);
-            return inst;
-        }
-
         public void SkipBytes(int n)
         {
             _offset += (ushort)n;

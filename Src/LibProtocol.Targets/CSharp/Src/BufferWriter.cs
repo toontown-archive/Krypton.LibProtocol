@@ -227,11 +227,6 @@ namespace Krypton.LibProtocol
         {
             Size += n;
         }
-
-        public void WriteType<T>(T type) where T: KryptonType<T>, new()
-        {
-            type.Write(this);
-        }
         
         /// <summary>
         /// A copy of all of the bytes in the <see cref="BufferWriter"/>.
