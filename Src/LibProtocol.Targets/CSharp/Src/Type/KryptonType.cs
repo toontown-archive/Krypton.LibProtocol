@@ -4,7 +4,22 @@ using System.Reflection.Emit;
 
 namespace Krypton.LibProtocol.Type
 {
-    public abstract class KryptonType<T> where T: KryptonType<T>, new()
+    public interface IKryptonType
+    {
+        /// <summary>
+        /// Writes the type to a BufferWriter
+        /// </summary>
+        /// <param name="bw"></param>
+        void Write(BufferWriter bw);
+
+        /// <summary>
+        /// Populates the type with data read from the BufferReader
+        /// </summary>
+        /// <param name="br"></param>
+        void Consume(BufferReader br);
+    }
+
+    public abstract class KryptonType<T> : IKryptonType where T: KryptonType<T>, new()
     {
         private static Func<TK> GenerateFactory<TK>() where TK: KryptonType<T>, new()
         {
@@ -25,19 +40,7 @@ namespace Krypton.LibProtocol.Type
             return (Func<TK>)method.CreateDelegate(typeof(Func<TK>));
         }
         
-        public static readonly Func<T> CreateInstance = GenerateFactory<T>();
-        
-        /// <summary>
-        /// Writes the type to a BufferWriter
-        /// </summary>
-        /// <param name="bw"></param>
-        public abstract void Write(BufferWriter bw);
-
-        /// <summary>
-        /// Populates the type with data read from the BufferReader
-        /// </summary>
-        /// <param name="br"></param>
-        public abstract void Consume(BufferReader br);
+        public static readonly Func<T> Create = GenerateFactory<T>();
         
         /// <summary>
         /// Creates and populates a type from the BufferReader
@@ -46,9 +49,13 @@ namespace Krypton.LibProtocol.Type
         /// <returns></returns>
         public static T Read(BufferReader br)
         {
-            var inst = CreateInstance();
+            var inst = Create();
             inst.Consume(br);
             return inst;
         }
+        
+        public abstract void Write(BufferWriter bw);
+
+        public abstract void Consume(BufferReader br);
     }
 }

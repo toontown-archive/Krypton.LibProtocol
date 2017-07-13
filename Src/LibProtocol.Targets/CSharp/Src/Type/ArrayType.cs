@@ -32,8 +32,7 @@ namespace Krypton.LibProtocol.Type
 
             for (var i = 0; i < length; i++)
             {
-                var x = new TK();
-                x.Consume(br);
+                var x = KryptonType<TK>.Read(br);
                 
                 Value.Add(x);
             }
