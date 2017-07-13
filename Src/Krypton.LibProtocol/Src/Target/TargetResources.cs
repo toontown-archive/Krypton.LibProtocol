@@ -76,7 +76,7 @@ namespace Krypton.LibProtocol.Target
         /// <summary>
         /// Assembly containing the resources
         /// </summary>
-        protected static Assembly Assembly = Assembly.GetExecutingAssembly();
+        public static Assembly Assembly = Assembly.GetExecutingAssembly();
         
         /// <summary>
         /// Target resource folder name

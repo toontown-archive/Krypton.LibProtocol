@@ -18,7 +18,10 @@ PRIMITIVE
   | INT64 | UINT64
   | STRING | CSTRING
   | BUFFER
-  | ARRAY
+  ;
+
+GENERIC_PRIMITIVE
+  : ARRAY
   ;
 
 fragment BYTE : 'byte' ;
@@ -65,7 +68,6 @@ RBRACKET : '}' ;
 LPAREN : '(' ;
 RPAREN : ')' ;
 FSLASH : '/' ;
-LOOPOPERATOR : '..' ;
 fragment PLUSPLUS : '++' ;
 
 METAOPERATOR

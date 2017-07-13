@@ -2,11 +2,11 @@
 
 namespace Krypton.LibProtocol.Member.Type
 {
-    public class DeclaredGenericTypeReference : DeclaredTypeReference, ITypeContainer
+    public class LocalGenericTypeReference : LocalTypeReference, ITypeContainer
     {
         public IList<TypeReference> Generics { get; }
 
-        public DeclaredGenericTypeReference()
+        public LocalGenericTypeReference()
         {
             Generics = new List<TypeReference>();
         }
@@ -16,7 +16,6 @@ namespace Krypton.LibProtocol.Member.Type
             Generics.Add(reference);
         }
         
-        
-        public override string TemplateAlias => "declared_generic_type_reference";
+        public override string TemplateAlias => "local_generic_type_reference";
     }
 }

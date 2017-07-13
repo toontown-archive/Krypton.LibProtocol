@@ -1,4 +1,5 @@
-﻿using Krypton.LibProtocol.Member.Type;
+﻿using System.Collections.Generic;
+using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Member.Operation
 {
@@ -11,5 +12,7 @@ namespace Krypton.LibProtocol.Member.Operation
         {
             Type = reference;
         }
+
+        public override IList<DataOperation> Members => new[] {this};
     }
 }

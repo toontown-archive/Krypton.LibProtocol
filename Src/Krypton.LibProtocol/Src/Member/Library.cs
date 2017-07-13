@@ -8,6 +8,8 @@ namespace Krypton.LibProtocol.Member
         public IList<Packet> Packets { get; }
         public IList<TypeDeclaration> Types { get; }
         
+        public string Namespace => "Krypton.LibProtocol.Library." + Name;
+        
         public string Name { get; internal set; }
 
         public Library()

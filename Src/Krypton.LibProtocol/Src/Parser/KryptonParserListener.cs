@@ -6,7 +6,7 @@ using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Parser
 {
-    public abstract class BaseParserListener : KryptonParserBaseListener
+    public class KryptonParserListener : KryptonParserBaseListener
     {
         protected KPDLFile File;
 
@@ -15,7 +15,7 @@ namespace Krypton.LibProtocol.Parser
         protected Stack<ITypeContainer> TypeContainers;
         protected Stack<TypeName> TypeNames;
 
-        protected void Initialize(KPDLFile file)
+        public KryptonParserListener(KPDLFile file)
         {
             File = file;
             PacketContainers = new Stack<IPacketContainer>();
@@ -30,8 +30,7 @@ namespace Krypton.LibProtocol.Parser
             var filename = context.file.Text;
             var filepath = $"{dir}{filename}.kpdl";
             
-            var ctx = File.GenerateContext(filepath);
-            ctx.Build(this);
+            File.Load(filepath);
         }
 
         #region Type Declaration
@@ -106,23 +105,51 @@ namespace Krypton.LibProtocol.Parser
             TypeContainers.Pop();
         }
 
-        public override void EnterPrimitive_generic_type_reference(KryptonParser.Primitive_generic_type_referenceContext context)
+        public override void EnterGeneric_primitive_type_reference(KryptonParser.Generic_primitive_type_referenceContext context)
         {
             var parent = TypeContainers.Peek();
             var type = new GenericPrimitiveTypeReference
             {
-                Type = (Primitive) Enum.Parse(typeof(Primitive), context.PRIMITIVE().GetText(), true)
+                Type = (GenericPrimitive) Enum.Parse(typeof(GenericPrimitive), context.GENERIC_PRIMITIVE().GetText(), true)
             };
 
             parent.AcquireTypeReference(type);
             TypeContainers.Push(type);
         }
 
-        public override void ExitPrimitive_generic_type_reference(KryptonParser.Primitive_generic_type_referenceContext context)
+        public override void ExitGeneric_primitive_type_reference(KryptonParser.Generic_primitive_type_referenceContext context)
         {
             TypeContainers.Pop();
         }
-        
+
+        public override void EnterLocal_type_reference(KryptonParser.Local_type_referenceContext context)
+        {
+            var parent = TypeContainers.Peek();
+            var type = new LocalTypeReference
+            {
+                Name = context.IDENTIFIER().GetText()
+            };
+
+            parent.AcquireTypeReference(type);
+        }
+
+        public override void EnterLocal_generic_type_reference(KryptonParser.Local_generic_type_referenceContext context)
+        {
+            var parent = TypeContainers.Peek();
+            var type = new LocalGenericTypeReference
+            {
+                Name = context.IDENTIFIER().GetText()
+            };
+
+            parent.AcquireTypeReference(type);
+            TypeContainers.Push(type);
+        }
+
+        public override void ExitLocal_generic_type_reference(KryptonParser.Local_generic_type_referenceContext context)
+        {
+            TypeContainers.Pop();
+        }
+
         public override void EnterGeneric_attribute_reference(KryptonParser.Generic_attribute_referenceContext context)
         {
             var parent = TypeContainers.Peek();
@@ -133,7 +160,7 @@ namespace Krypton.LibProtocol.Parser
 
             parent.AcquireTypeReference(type);
         }
-
+        
         #endregion
 
         #region Operation Statements
@@ -166,21 +193,6 @@ namespace Krypton.LibProtocol.Parser
         }
 
         public override void ExitIf_statement(KryptonParser.If_statementContext context)
-        {
-            OperationContainers.Pop();
-        }
-
-        public override void EnterLoop_statement(KryptonParser.Loop_statementContext context)
-        {
-            var parent = OperationContainers.Peek();
-            
-            var operation = new LoopConditional();
-            parent.AddOperation(operation);
-            
-            OperationContainers.Push(operation);
-        }
-
-        public override void ExitLoop_statement(KryptonParser.Loop_statementContext context)
         {
             OperationContainers.Pop();
         }
@@ -221,6 +233,7 @@ namespace Krypton.LibProtocol.Parser
                 Name = context.name.Text
             };
             
+            File.Libraries.Add(library);
             PacketContainers.Push(library);
         }
 

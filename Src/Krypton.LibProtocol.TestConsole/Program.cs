@@ -10,8 +10,12 @@ namespace Krypton.LibProtocol.TestConsole
             pf.Includes.Directories.Add("Resources/");
             pf.Load("example.kpdl");
             
-            var settings = new CSharpTargetSettings();
-            CSharpTargetGenerator.Generate(pf, settings);
+            var settings = new CSharpTargetSettings
+            {
+                OutDirectory = "Gen/"
+            };
+            var generator = new CSharpTargetGenerator(pf);
+            generator.Generate(settings);
         }
     }
 }

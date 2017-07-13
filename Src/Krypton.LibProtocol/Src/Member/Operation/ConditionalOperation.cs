@@ -2,6 +2,16 @@
 
 namespace Krypton.LibProtocol.Member.Operation
 {
+    public enum Operator
+    {
+        Equality,
+        Inequality,
+        Less,
+        LessOrEqual,
+        Greater,
+        GreaterOrEqual
+    }
+    
     public abstract class ConditionalValue
     {
     }
@@ -21,6 +31,19 @@ namespace Krypton.LibProtocol.Member.Operation
         public void AddOperation(OperationBase operation)
         {
             Operations.Add(operation);
+        }
+
+        public override IList<DataOperation> Members
+        {
+            get
+            {
+                var x = new List<DataOperation>();
+                foreach (var operation in Operations)
+                {
+                    x.AddRange(operation.Members);
+                }
+                return x;
+            }
         }
     }
 }

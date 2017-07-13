@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace Krypton.LibProtocol.Target.CSharp
+namespace Krypton.LibProtocol.Extensions
 {
     public static class StringExtensions
     {

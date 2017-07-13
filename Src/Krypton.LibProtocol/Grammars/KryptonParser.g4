@@ -37,7 +37,7 @@ packet_parent : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parent)?
 
 type_reference 
     : primitive_type_reference
-    | primitive_generic_type_reference
+    | generic_primitive_type_reference
     | declared_type_reference
     | declared_generic_type_reference
     | local_type_reference
@@ -49,8 +49,8 @@ primitive_type_reference
     : PRIMITIVE
     ;
     
-primitive_generic_type_reference
-    : PRIMITIVE '<' type_reference (',' type_reference)* '>'
+generic_primitive_type_reference
+    : GENERIC_PRIMITIVE '<' type_reference (',' type_reference)* '>'
     ;
 
 declared_type_reference
@@ -100,14 +100,9 @@ conditional_value
 if_statement
     : conditional_value OPERATOR conditional_value
     ;
-    
-loop_statement
-    : conditional_value LOOPOPERATOR conditional_value
-    ;
  
  conditional
     : if_statement
-    | loop_statement
     ;
  
  conditional_statement

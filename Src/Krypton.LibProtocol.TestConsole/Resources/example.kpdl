@@ -1,13 +1,14 @@
 group ClusterMember;
 
 library krypton {
-    declare client_info {
+    declare client_info<some_generic> {
         string ipv4;
         uint16 port;
+        some_generic generic_member;
     }
  
-    declare cluster_info {
-        array<this::client_info> clients;
+    declare cluster_info<some_generic> {
+        array<this::client_info<some_generic>> clients;
         uint32 uptime;
     }
 }

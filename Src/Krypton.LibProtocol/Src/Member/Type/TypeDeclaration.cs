@@ -8,7 +8,7 @@ namespace Krypton.LibProtocol.Member.Type
         public TypeName Name { get; internal set; }
         public IList<OperationBase> Operations { get; }
 
-        public TypeDeclaration()
+        internal TypeDeclaration()
         {
             Operations = new List<OperationBase>();
         }
@@ -16,6 +16,19 @@ namespace Krypton.LibProtocol.Member.Type
         public void AddOperation(OperationBase operation)
         {
             Operations.Add(operation);
+        }
+
+        public IList<DataOperation> Members
+        {
+            get
+            {
+                var x = new List<DataOperation>();
+                foreach (var operation in Operations)
+                {
+                    x.AddRange(operation.Members);
+                }
+                return x;
+            }
         }
     }
 }

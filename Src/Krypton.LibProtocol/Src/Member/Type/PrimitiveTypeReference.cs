@@ -14,18 +14,22 @@
         UInt64,
         String,
         CString,
-        Buffer,
-        Array
+        Buffer
     }
-    
-    public class PrimitiveTypeReference : TypeReference
-    {
-        public Primitive Type { get; internal set; }
 
+    public abstract class PrimitiveTypeReference<T> : TypeReference
+    {
+        public T Type { get; internal set; }
+        
         public override string Name
         {
-            get => $"{Type}Type";
+            get => Type.ToString();
             internal set { }
         }
+    }
+
+    public class PrimitiveTypeReference : PrimitiveTypeReference<Primitive>
+    {
+        public override string TemplateAlias => "primitive_type_reference";
     }
 }

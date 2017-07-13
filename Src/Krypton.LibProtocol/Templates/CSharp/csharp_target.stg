@@ -1,0 +1,59 @@
+type_reference_builder(typeref) ::= <<
+<(typeref.TemplateAlias)(typeref)>
+>>
+
+primitive_type_reference(typeref) ::= <<
+<typeref.CamelCaseName>Type
+>>
+
+generic_primitive_type_reference(typeref) ::= <<
+<typeref.CamelCaseName>Type\<<typeref.Generics:type_reference_builder(); separator=",">\>
+>>
+
+declared_type_reference(typeref) ::= <<
+<typeref.CamelCaseName>
+>>
+
+declared_generic_type_reference(typeref) ::= <<
+<typeref.CamelCaseName>\<<typeref.Generics:type_reference_builder(); separator=",">\>
+>>
+
+local_type_reference(typeref) ::= <<
+<typeref.CamelCaseName>
+>>
+
+local_generic_type_reference(typeref) ::= <<
+<typeref.CamelCaseName>\<<typeref.Generics:type_reference_builder(); separator=",">\>
+>>
+
+generic_attribute_reference(typeref) ::= <<
+<typeref.Name>
+>>
+
+type_name_builder(typename) ::= <<
+<typename.Name><if(typename.HasGenerics)>\<<typename.Generics; separator=",">\><endif>
+>>
+
+type_constraints_builder(typename) ::= <<
+<typename.Generics:{generic | where <generic>: KryptonType\<<generic>\>, new()}; separator="\n">
+>>
+
+type_member_declaration(member) ::= <<
+    public <type_reference_builder(member.Type)> <member.Name> { get; set; }
+>>
+
+type_declaration(type) ::= <<
+    public class <type_name_builder(type.Name)> : KryptonType \< <type_name_builder(type.Name)> > 
+    <type_constraints_builder(type.Name)>
+    {
+        <type.Members:type_member_declaration(); separator="\n">
+    }
+>>
+
+library_declaration(library) ::= <<
+namespace <library.Namespace> {
+
+    <library.Types:type_declaration(); separator="\n">
+
+}
+>>
