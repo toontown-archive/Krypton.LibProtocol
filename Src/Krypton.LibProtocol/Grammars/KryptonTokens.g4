@@ -68,17 +68,17 @@ RBRACKET : '}' ;
 LPAREN : '(' ;
 RPAREN : ')' ;
 FSLASH : '/' ;
-fragment PLUSPLUS : '++' ;
-
-METAOPERATOR
-    : PLUSPLUS
-    ;
 
 IDENTIFIER 
     : [A-Za-z_][A-Za-z_0-9]+ 
     ;
 
 INTEGER : [0-9]+ ;
+
+// redirect comments to a different channel
+KPDL_COMMENT : '#' ~[\r\n]* -> skip ;
+LINE_COMMENT : '//' ~[\r\n]* -> channel(HIDDEN) ;
+BLOCK_COMMENT : '/*' .*? '*/' -> channel(HIDDEN) ;
 
 // skip whitespace
 WS : [ \t\r\n]+ -> skip ;

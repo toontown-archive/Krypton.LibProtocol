@@ -109,17 +109,12 @@ if_statement
     : '(' conditional ')' '=>' '{' operation_statement+ '}' ';'
     ;
  
- meta_operation
-    : IDENTIFIER METAOPERATOR ';'
-    ;
- 
  data_statement
     : type_reference IDENTIFIER ';'
     ;
  
  operation_statement
     : conditional_statement
-    | meta_operation
     | data_statement
     ;
 

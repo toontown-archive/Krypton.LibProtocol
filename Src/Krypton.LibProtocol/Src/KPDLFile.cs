@@ -10,14 +10,14 @@ namespace Krypton.LibProtocol
     public class KPDLFile
     {
         public FileResolver Includes { get; }
-        public IList<string> Groups { get; }
+        public IList<Group> Groups { get; }
         
         public IList<Library> Libraries { get; }
         
         public KPDLFile()
         {
             Includes = new FileResolver();
-            Groups = new List<string>();
+            Groups = new List<Group>();
             Libraries = new List<Library>();
         }
 
@@ -26,8 +26,9 @@ namespace Krypton.LibProtocol
             Libraries.Add(library);
         }
 
-        internal void AddGroup(string group)
+        internal void AddGroup(Group group)
         {
+            group.Id = Groups.Count;
             Groups.Add(group);
         }
         
@@ -45,7 +46,7 @@ namespace Krypton.LibProtocol
                 var tokens = new CommonTokenStream(lexer); 
                 var parser = new KryptonParser(tokens);
 
-                var walker = new ParseTreeWalker();
+                var walker = new KryptonParseTreeWalker();
                 var listener = new KryptonParserListener(this);
                 walker.Walk(listener, parser.init());
             }

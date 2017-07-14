@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Antlr4.Runtime;
+using Antlr4.StringTemplate.Misc;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Operation;
 using Krypton.LibProtocol.Member.Type;
@@ -186,7 +188,7 @@ namespace Krypton.LibProtocol.Parser
         {
             var parent = OperationContainers.Peek();
             
-            var operation = new IfConditional();
+            var operation = new IfOperation();
             parent.AddOperation(operation);
             
             OperationContainers.Push(operation);
@@ -263,7 +265,11 @@ namespace Krypton.LibProtocol.Parser
 
         public override void EnterGroup_definition(KryptonParser.Group_definitionContext context)
         {
-            File.AddGroup(context.name.Text);
+            var group = new Group
+            {
+                Name = context.name.Text
+            };
+            File.AddGroup(group);
         }
     }
 }

@@ -25,9 +25,21 @@ namespace Krypton.LibProtocol.Target.CSharp
             }
         }
 
+        protected void GenerateGroups(CSharpTargetSettings settings)
+        {
+            var template = ReadTemplate("groups.stg");
+            var decl = template.GetInstanceOf("group_declarations");
+            decl.Add("kpdl", File);
+            var render = decl.Render();
+                
+            var path = Path.Combine(settings.OutDirectory, "Group.cs");
+            System.IO.File.WriteAllText(path, render);
+        }
+
         public override void Generate(CSharpTargetSettings settings)
         {       
             GenerateLibraries(settings);
+            GenerateGroups(settings);
         }
     }
 }
