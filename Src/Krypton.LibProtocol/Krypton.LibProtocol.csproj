@@ -10,7 +10,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Grammars\Gen\Krypton\LibProtocol\Parser" />
-    <EmbeddedResource Include="..\LibProtocol.Targets\CSharp\Src\**\*.cs" />
     <EmbeddedResource Include="Templates\**\*" />
   </ItemGroup>
 </Project>

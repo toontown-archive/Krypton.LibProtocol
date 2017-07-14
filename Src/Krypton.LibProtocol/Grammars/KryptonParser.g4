@@ -90,23 +90,12 @@ generic_type_attribute
 
 // Operation statements
 
-conditional_value
-    : TRUE 
-    | FALSE 
-    | INTEGER 
-    | IDENTIFIER 
-    ;
-
 if_statement
-    : conditional_value OPERATOR conditional_value
-    ;
- 
- conditional
-    : if_statement
+    : '(' expression ')' '=>' '{' operation_statement+ '}' ';'
     ;
  
  conditional_statement
-    : '(' conditional ')' '=>' '{' operation_statement+ '}' ';'
+    : if_statement
     ;
  
  data_statement
@@ -116,6 +105,13 @@ if_statement
  operation_statement
     : conditional_statement
     | data_statement
+    ;
+
+// Expressions
+
+// todo
+expression
+    : FALSE
     ;
 
 // Utility
