@@ -1,11 +1,32 @@
-﻿namespace Krypton.LibProtocol.Member
+﻿using System;
+using System.Collections.Generic;
+using Krypton.LibProtocol.Member.Type;
+
+namespace Krypton.LibProtocol.Member
 {
-    public class Library : PacketContainer
+    public class Library : IPacketContainer
     {
-        internal Library(string name) : base(name)
+        public IList<Packet> Packets { get; }
+        public IList<TypeDeclaration> Types { get; }
+        
+        public string Namespace => "Krypton.LibProtocol.Library." + Name;
+        
+        public string Name { get; internal set; }
+
+        public Library()
         {
+            Packets = new List<Packet>();
+            Types = new List<TypeDeclaration>();
         }
-        
-        
+
+        public void AddType(TypeDeclaration type)
+        {
+            Types.Add(type);
+        }
+
+        public void AddPacket(Packet packet)
+        {
+            Packets.Add(packet);
+        }
     }
 }

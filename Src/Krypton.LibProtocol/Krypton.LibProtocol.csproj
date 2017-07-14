@@ -6,11 +6,11 @@
     <PackageReference Include="Antlr4.Runtime.Standard">
       <Version>4.7.1</Version>
     </PackageReference>
-    <PackageReference Include="System.CodeDom" Version="4.4.0-preview2-25405-01" />
+    <PackageReference Include="StringTemplate4" Version="4.0.8" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Grammars\Gen\Krypton\LibProtocol\Parser" />
-    <Compile Remove="Resources\Target\CSharp\*.cs" />
-    <EmbeddedResource Include="Resources\Target\CSharp\*.cs" />
+    <EmbeddedResource Include="..\LibProtocol.Targets\CSharp\Src\**\*.cs" />
+    <EmbeddedResource Include="Templates\**\*" />
   </ItemGroup>
 </Project>

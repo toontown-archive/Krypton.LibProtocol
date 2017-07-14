@@ -1,68 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using Krypton.LibProtocol.Parser;
+﻿using System.Collections.Generic;
+using Krypton.LibProtocol.Member.Operation;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Packet : StatementContainer
+    public class Packet : IOperationContainer
     {
-        public string Name { get; }
         public IList<Packet> Parents { get; }
+        public string Name { get; internal set; }
+        
+        public IList<OperationBase> Operations { get; }
 
-        internal Packet(string name)
+        public Packet()
         {
-            Name = name;
             Parents = new List<Packet>();
+            Operations = new List<OperationBase>();
         }
 
-        internal void AddParent(Packet parent)
+        public void AddOperation(OperationBase operation)
         {
-            if (Parents.Contains(parent))
-            {
-                throw new KryptonParserException($"Packet {Name} contains parent {parent.Name} more than once.");
-            }
-
-            Parents.Add(parent);
-        }
-
-        public override void AddStatement(IPacketStatement statement)
-        {
-            var data = statement as DataStatement;
-            if (data != null)
-            {
-                AddStatement(data);
-            }
-            else
-            {
-                AddStatement(statement as ConditionalStatement);
-            }
-        }
-
-        private void AddStatement(DataStatement statement)
-        {
-            // todo: checks
-            Statements.Add(statement);
-        }
-
-        private void AddStatement(ConditionalStatement statement)
-        {
-            // todo: checks
-            Statements.Add(statement);
-        }
-
-        public List<IPacketStatement> InheritedStatements
-        {
-            get
-            {
-                var statements = new List<IPacketStatement>();
-
-                foreach (var parent in Parents)
-                {
-                    statements.AddRange(parent.InheritedStatements);
-                    statements.AddRange(parent.Statements);
-                }
-                return statements;
-            }
+            Operations.Add(operation);
         }
     }
 }

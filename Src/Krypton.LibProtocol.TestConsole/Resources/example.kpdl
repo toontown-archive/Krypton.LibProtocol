@@ -1,11 +1,15 @@
-import groups.kpdl;
-
 group ClusterMember;
 
-library Krypton {
-    packet Packet {
-        uint16 message_type;
-        buffer data;
+library krypton {
+    declare client_info<some_generic> {
+        string ipv4;
+        uint16 port;
+        some_generic generic_member;
+    }
+ 
+    declare cluster_info<some_generic> {
+        array<this::client_info<some_generic>> clients;
+        uint32 uptime;
     }
 }
 

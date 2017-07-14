@@ -3,7 +3,8 @@ parser grammar KryptonParser;
 options 
     { tokenVocab=KryptonTokens; }
 
-// kpdl structure
+// Root members
+
 init : imports+=import_statement* groups+=group_definition* libraries+=library_definition* protocols+=protocol_definition*
      ;
 
@@ -12,33 +13,110 @@ import_statement : IMPORT (path=directory)? file=IDENTIFIER '.' KPDL ';'
 
 group_definition : GROUP name=IDENTIFIER ';' ;
 
-library_definition : LIBRARY name=IDENTIFIER '{' packets+=packet_definition* '}' ;
+library_definition : LIBRARY name=IDENTIFIER '{' library_statement* '}' ;
+
+library_statement
+    : packet_definition
+    | type_declaration
+    ;
 
 protocol_definition : PROTOCOL 
                       ns=namespace '[' name=IDENTIFIER ']'
-                      '{' statements=proto_statements '}' ;
-
-proto_statements : messages+=message_definitions packets+=packet_definition* ;
+                      '{' message_definitions? packet_definition* '}' ;
 
 message_definitions : name=IDENTIFIER (',' message_definitions)?
                     ;
 
-packet_definition : PACKET name=IDENTIFIER (':' parents+=packet_parents)? 
-                    '{' statements+=packet_statement+ '}' ;
+packet_definition : PACKET name=IDENTIFIER (':' packet_parent)? 
+                    '{' operation_statement+ '}' ;
 
-packet_parents : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parents)?
-               ;
+packet_parent : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parent)?
+              ;
 
-packet_statement : datadef=data_definition
-                 | condef=conditional_definition
-                 ;
+// Types
 
-data_definition : type=PRIMITIVE name=IDENTIFIER ';' ; 
-conditional_definition : '(' condition ')' '=>' 
-                         '{' statements+=packet_statement+ '}' ';' ;
-condition : val1=condition_value op=OPERATOR val2=condition_value ;
+type_reference 
+    : primitive_type_reference
+    | generic_primitive_type_reference
+    | declared_type_reference
+    | declared_generic_type_reference
+    | local_type_reference
+    | local_generic_type_reference
+    | generic_attribute_reference
+    ;
 
-condition_value : TRUE | FALSE | INTEGER | IDENTIFIER ;
+primitive_type_reference
+    : PRIMITIVE
+    ;
+    
+generic_primitive_type_reference
+    : GENERIC_PRIMITIVE '<' type_reference (',' type_reference)* '>'
+    ;
+
+declared_type_reference
+    : namespace '::' IDENTIFIER
+    ;
+    
+declared_generic_type_reference
+    : namespace '::' IDENTIFIER '<' type_reference (',' type_reference)* '>'
+    ;
+    
+local_type_reference
+    : THIS '::' IDENTIFIER
+    ;
+    
+local_generic_type_reference
+    : THIS '::' IDENTIFIER '<' type_reference (',' type_reference)* '>'
+    ;
+
+generic_attribute_reference
+    : IDENTIFIER
+    ;
+
+// Type declaration
+
+type_declaration 
+    : DECLARE IDENTIFIER generic_type_attributes? '{' operation_statement+ '}'
+    ;
+ 
+        
+generic_type_attributes
+    : '<' generic_type_attribute (',' generic_type_attribute)* '>'
+    ;
+
+generic_type_attribute
+    : IDENTIFIER
+    ;
+
+// Operation statements
+
+conditional_value
+    : TRUE 
+    | FALSE 
+    | INTEGER 
+    | IDENTIFIER 
+    ;
+
+if_statement
+    : conditional_value OPERATOR conditional_value
+    ;
+ 
+ conditional
+    : if_statement
+    ;
+ 
+ conditional_statement
+    : '(' conditional ')' '=>' '{' operation_statement+ '}' ';'
+    ;
+ 
+ data_statement
+    : type_reference IDENTIFIER ';'
+    ;
+ 
+ operation_statement
+    : conditional_statement
+    | data_statement
+    ;
 
 // Utility
 

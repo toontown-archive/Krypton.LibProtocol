@@ -5,6 +5,8 @@ GROUP : 'group' ;
 LIBRARY : 'library' ;
 PROTOCOL : 'protocol' ;
 PACKET : 'packet' ;
+DECLARE : 'declare' ;
+THIS : 'this' ;
 KPDL : 'kpdl' ;
 
 PRIMITIVE 
@@ -16,6 +18,10 @@ PRIMITIVE
   | INT64 | UINT64
   | STRING | CSTRING
   | BUFFER
+  ;
+
+GENERIC_PRIMITIVE
+  : ARRAY
   ;
 
 fragment BYTE : 'byte' ;
@@ -31,9 +37,17 @@ fragment UINT64 : 'uint64' ;
 fragment STRING : 'string' ;
 fragment CSTRING : 'cstring' ;
 fragment BUFFER : 'buffer';
+fragment ARRAY : 'array' ;
 
 TRUE : 'true' ;
 FALSE : 'false' ;
+
+GREATER : '>' ;
+LESS : '<' ;
+fragment EQUAL : '==' ;
+fragment NOTEQUAL : '!=' ;
+fragment GREATER_OR_EQUAL : '>=' ;
+fragment LESS_OR_EQUAL : '<=' ;
 
 OPERATOR 
   : EQUAL | NOTEQUAL
@@ -41,17 +55,11 @@ OPERATOR
   | LESS_OR_EQUAL | LESS
   ;
 
-fragment EQUAL : '==' ;
-fragment NOTEQUAL : '!=' ;
-fragment GREATER_OR_EQUAL : '>=' ;
-fragment GREATER : '>' ;
-fragment LESS_OR_EQUAL : '<=' ;
-fragment LESS : '<' ;
-
 DIRECTIVE : '=>' ;
 PERIOD : '.' ;
 COMMA : ',' ;
 COLON : ':' ;
+DOUBLECOLON : '::' ;
 SEMICOLON : ';' ;
 LSBRACKET : '[' ;
 RSBRACKET : ']' ;
@@ -61,8 +69,16 @@ LPAREN : '(' ;
 RPAREN : ')' ;
 FSLASH : '/' ;
 
-IDENTIFIER : [A-Za-z_][A-Za-z_0-9]+ ;
+IDENTIFIER 
+    : [A-Za-z_][A-Za-z_0-9]+ 
+    ;
+
 INTEGER : [0-9]+ ;
+
+// redirect comments to a different channel
+KPDL_COMMENT : '#' ~[\r\n]* -> skip ;
+LINE_COMMENT : '//' ~[\r\n]* -> channel(HIDDEN) ;
+BLOCK_COMMENT : '/*' .*? '*/' -> channel(HIDDEN) ;
 
 // skip whitespace
 WS : [ \t\r\n]+ -> skip ;

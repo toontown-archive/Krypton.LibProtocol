@@ -1,34 +1,29 @@
 ﻿using System.Collections.Generic;
-using Krypton.LibProtocol.Parser;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Protocol : PacketContainer
-    {
-        public KPDLFile File { get; }
-        public string Namespace { get; }
-        internal IList<Message> Messages { get; }
+    public class Protocol : IPacketContainer
+    {        
+        public string Name { get; internal set; }
+        public string Namespace { get; internal set; }
         
-        internal Protocol(string ns, string name, KPDLFile file) : base(name)
+        public IList<Packet> Packets { get; }
+        public IList<string> Messages { get; }
+
+        public Protocol()
         {
-            File = file;
-            Namespace = ns;
-            Messages = new List<Message>();
+            Packets = new List<Packet>();
+            Messages = new List<string>();
+        }
+        
+        public void AddPacket(Packet packet)
+        {
+            Packets.Add(packet);
         }
 
-        internal void AddMessage(Message message)
+        public void AddMessage(string message)
         {
-            // Verify this message hasnt been defined
-            foreach (var m in Messages)
-            {
-                if (m.Name == message.Name)
-                {
-                    throw new KryptonParserException($"Message {m.Name} is already defined");
-                }
-            }
-            
             Messages.Add(message);
-            File.AddMessage(message);
         }
     }
 }

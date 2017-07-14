@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Parser;
 
@@ -9,126 +9,47 @@ namespace Krypton.LibProtocol
 {
     public class KPDLFile
     {
-        internal FileResolver Includes { get; }
-        internal IList<Group> Groups { get; }
-        internal IList<Library> Libraries { get; }
-        internal IList<Protocol> Protocols { get; }
-        internal IList<Message> Messages { get; }
+        public FileResolver Includes { get; }
+        public IList<Group> Groups { get; }
         
-        internal IList<string> Files { get; }
-
+        public IList<Library> Libraries { get; }
+        
         public KPDLFile()
         {
             Includes = new FileResolver();
             Groups = new List<Group>();
             Libraries = new List<Library>();
-            Protocols = new List<Protocol>();
-            Messages = new List<Message>();
-            
-            Files = new List<string>();
         }
 
-        public void AddIncludeDirectory(string directory)
-        {
-            Includes.Directories.Add(directory);
-        }
-        
-        internal Library ResolveLibrary(string name)
-        {
-            return Libraries.FirstOrDefault(library => library.Name == name);
-        }
-
-        internal Packet ResolveLibraryPacket(string lib, string packet)
-        {
-            var library = ResolveLibrary(lib);
-            return library?.ResolvePacket(packet);
-        }
-
-        /// <summary>
-        /// Adds a protocol
-        /// </summary>
-        /// <param name="protocol"></param>
-        /// <exception cref="KryptonParserException"></exception>
-        internal void AddProtocol(Protocol protocol)
-        {
-            // Verify this protocol hasnt been defined
-            foreach (var p in Protocols)
-            {
-                if (p.Namespace == protocol.Namespace && p.Name == protocol.Name)
-                {
-                    throw new KryptonParserException($"Protocol {p.Name} is already defined");
-                }
-            }
-            
-            Protocols.Add(protocol);
-        }
-
-        /// <summary>
-        /// Adds a library
-        /// </summary>
-        /// <param name="library"></param>
-        /// <exception cref="KryptonParserException"></exception>
         internal void AddLibrary(Library library)
         {
-            // Verify this library hasnt been defined
-            foreach (var l in Libraries)
-            {
-                if (l.Name == library.Name)
-                {
-                    throw new KryptonParserException($"Library {l.Name} is already defined");
-                }
-            }
-            
             Libraries.Add(library);
         }
 
-        /// <summary>
-        /// Adds a group
-        /// </summary>
-        /// <param name="group"></param>
-        /// <exception cref="KryptonParserException"></exception>
         internal void AddGroup(Group group)
         {
-            // Verify this group hasnt been defined
-            foreach (var g in Groups)
-            {
-                if (g.Name == group.Name)
-                {
-                    throw new KryptonParserException($"Group {g.Name} is already defined");
-                }
-            }
-
-            // Assign the group an id and add it to our list
-            group.Id = Groups.Count + 1;
+            group.Id = Groups.Count;
             Groups.Add(group);
         }
-
-        internal void AddMessage(Message message)
-        {
-            message.Id = Messages.Count + 1;
-            Messages.Add(message);
-        }
-
-        /// <summary>
-        /// Reads a .kpdl file
-        /// </summary>
-        /// <param name="filepath">Path to the kpdl file</param>
-        public void Read(string filepath)
-        {
-            filepath = Includes.Resolve(filepath);
-            using (var fs = new FileStream(filepath, FileMode.Open))
-            {
+        
+        /// <summary> 
+        /// Loads in .kpdl file context
+        /// </summary> 
+        /// <param name="filepath">Path to the kpdl file</param> 
+        public void Load(string filepath) 
+        { 
+            filepath = Includes.Resolve(filepath); 
+            using (var fs = new FileStream(filepath, FileMode.Open)) 
+            { 
                 var inputStream = new AntlrInputStream(fs);
-                var lexer = new KryptonTokens(inputStream);
-                var tokens = new CommonTokenStream(lexer);
+                var lexer = new KryptonTokens(inputStream); 
+                var tokens = new CommonTokenStream(lexer); 
                 var parser = new KryptonParser(tokens);
-                
-                var context = parser.init();
-                var handler = new KryptonContextHandler(this);
-                handler.HandleInitCtx(context);
-            }
 
-            Files.Append(Path.GetFileName(filepath));
+                var walker = new KryptonParseTreeWalker();
+                var listener = new KryptonParserListener(this);
+                walker.Walk(listener, parser.init());
+            }
         }
     }
 }

@@ -1,0 +1,13 @@
+group_declarations(kpdl) ::= <<
+namespace Krypton.LibProtocol {
+    public static class Group {
+    
+        <kpdl.Groups:group_declaration()>
+    
+    }
+}
+>>
+
+group_declaration(def) ::= <<
+    public static readonly int <def.Name> = <def.Id>;
+>>

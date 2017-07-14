@@ -7,22 +7,15 @@ namespace Krypton.LibProtocol.TestConsole
         public static void Main(string[] args)
         {
             var pf = new KPDLFile();
-            pf.AddIncludeDirectory("Resources/");
-            pf.Read("example.kpdl");
-
-            var target = new CSharpTarget();
-            var context = target.Build(pf);
+            pf.Includes.Directories.Add("Resources/");
+            pf.Load("example.kpdl");
             
             var settings = new CSharpTargetSettings
             {
-                Output = "Gen",
-                Groups = new CSharpTargetSettings.GroupSettings
-                {
-                    Namespace = "Krypton.Protocol",
-                    ClassName = "Groups"
-                }
+                OutDirectory = "Gen/"
             };
-            context.Write(settings);
+            var generator = new CSharpTargetGenerator(pf);
+            generator.Generate(settings);
         }
     }
 }
