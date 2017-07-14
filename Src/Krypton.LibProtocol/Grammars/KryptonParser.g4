@@ -13,13 +13,6 @@ import_statement : IMPORT (path=directory)? file=IDENTIFIER '.' KPDL ';'
 
 group_definition : GROUP name=IDENTIFIER ';' ;
 
-library_definition : LIBRARY name=IDENTIFIER '{' library_statement* '}' ;
-
-library_statement
-    : packet_definition
-    | type_declaration
-    ;
-
 protocol_definition : PROTOCOL 
                       ns=namespace '[' name=IDENTIFIER ']'
                       '{' message_definitions? packet_definition* '}' ;
@@ -32,6 +25,18 @@ packet_definition : PACKET name=IDENTIFIER (':' packet_parent)?
 
 packet_parent : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parent)?
               ;
+
+// Library parsing
+
+library_options : OPTIONS OPTIONS_ENTER library_option* OPTIONS_EXIT ;
+library_option : OPTION_KEY OPTION_SET OPTION_VALUE OPTION_END ;
+
+library_definition : LIBRARY name=IDENTIFIER '{' library_options? library_statement* '}' ;
+
+library_statement
+    : packet_definition
+    | type_declaration
+    ;
 
 // Types
 

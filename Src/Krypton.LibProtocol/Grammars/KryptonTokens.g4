@@ -7,6 +7,7 @@ PROTOCOL : 'protocol' ;
 PACKET : 'packet' ;
 DECLARE : 'declare' ;
 THIS : 'this' ;
+OPTIONS : 'options' -> pushMode(LIBRARY_OPTIONS);
 KPDL : 'kpdl' ;
 
 PRIMITIVE 
@@ -42,19 +43,7 @@ fragment ARRAY : 'array' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 
-GREATER : '>' ;
-LESS : '<' ;
-fragment EQUAL : '==' ;
-fragment NOTEQUAL : '!=' ;
-fragment GREATER_OR_EQUAL : '>=' ;
-fragment LESS_OR_EQUAL : '<=' ;
-
-OPERATOR 
-  : EQUAL | NOTEQUAL
-  | GREATER_OR_EQUAL | GREATER
-  | LESS_OR_EQUAL | LESS
-  ;
-
+EQUALS : '=' ;
 DIRECTIVE : '=>' ;
 PERIOD : '.' ;
 COMMA : ',' ;
@@ -68,6 +57,8 @@ RBRACKET : '}' ;
 LPAREN : '(' ;
 RPAREN : ')' ;
 FSLASH : '/' ;
+SINGLEQUOTE : '\'';
+DOUBLEQUOTE : '"';
 
 IDENTIFIER 
     : [A-Za-z_][A-Za-z_0-9]+ 
@@ -82,3 +73,44 @@ BLOCK_COMMENT : '/*' .*? '*/' -> channel(HIDDEN) ;
 
 // skip whitespace
 WS : [ \t\r\n]+ -> skip ;
+
+mode LIBRARY_OPTIONS;
+OPTIONS_ENTER
+  : LBRACKET
+  ;
+  
+OPTIONS_EXIT
+  : RBRACKET -> popMode ;
+
+OPTION_KEY
+  : 'namespace'
+  ;
+  
+OPTION_VALUE 
+  : DOUBLEQUOTE IDENTIFIER DOUBLEQUOTE
+  ;
+
+OPTION_SET
+  : EQUALS
+  ;
+
+OPTION_END
+  : SEMICOLON
+  ;
+  
+// skip whitespace
+LIBRARY_OPTIONS_WS : WS -> skip ;
+
+mode EXPRESSIONS;
+GREATER : '>' ;
+LESS : '<' ;
+EQUAL : '==' ;
+NOTEQUAL : '!=' ;
+GREATER_OR_EQUAL : '>=' ;
+LESS_OR_EQUAL : '<=' ;
+
+OPERATOR 
+  : EQUAL | NOTEQUAL
+  | GREATER_OR_EQUAL | GREATER
+  | LESS_OR_EQUAL | LESS
+  ;
