@@ -82,14 +82,7 @@ OPTIONS_ENTER
   ;
  
 OPTIONS_EXIT
-  : RBRACKET -> popMode ;
-
-OPTION_KEY
-  : TEXT
-  ;
-  
-OPTION_VALUE 
-  : TEXT
+  : RBRACKET -> popMode 
   ;
 
 OPTION_SET

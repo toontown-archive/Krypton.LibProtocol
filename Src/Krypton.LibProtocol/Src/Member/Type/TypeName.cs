@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Krypton.LibProtocol.Extensions;
-using Krypton.LibProtocol.Target.CSharp;
 
 namespace Krypton.LibProtocol.Member.Type
 {

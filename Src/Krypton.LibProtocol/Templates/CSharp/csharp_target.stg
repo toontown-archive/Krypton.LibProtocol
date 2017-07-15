@@ -42,8 +42,12 @@ type_member_declaration(member) ::= <<
 public <type_reference_builder(member.Type)> <member.CamelCaseName> { get; set; }
 >>
 
+type_member_init(member) ::= <<
+<member.CamelCaseName> = <if(member.Type.Attribute)>KryptonType\<<member.Type.Name>\><else><type_reference_builder(member.Type)><endif>.Create();
+>>
+
 data_operation_consume(operation) ::= <<
-<operation.CamelCaseName>.Read(br);
+<operation.CamelCaseName>.Consume(br);
 >>
 
 if_operation_consume(operation) ::= <<
@@ -64,12 +68,16 @@ type_write_operation(operation) ::= <<
 <(operation.WriteAlias)(operation)>
 >>
 
-
 type_declaration(type) ::= <<
 public class <type_name_builder(type.Name)> : KryptonType \<<type_name_builder(type.Name)>\> 
 <type_constraints_builder(type.Name)>
 {
     <type.Members:type_member_declaration(); separator="\n">
+ 
+    public <type.Name.CamelCaseName>()
+    {
+        <type.Members:type_member_init(); separator="\n">
+    }
     
     public override void Consume(BufferReader br)
     {
@@ -86,8 +94,7 @@ public class <type_name_builder(type.Name)> : KryptonType \<<type_name_builder(t
 library_declaration(library) ::= <<
 namespace <library.Namespace> {
 
-    <library.Types:type_declaration(); separator="\n">
-
+    <library.Types:type_declaration(); separator="\n\n">
 }
 >>
 

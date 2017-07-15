@@ -1,4 +1,8 @@
 library library_testing {
+    options {
+        "namespace" = "Krypton.LibProtocol.Tests";
+    }
+
     declare client_info<client_type> {
         string ipv4;
         uint16 port;

@@ -29,7 +29,15 @@ packet_parent : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parent)?
 // Library parsing
 
 library_options : OPTIONS OPTIONS_ENTER library_option* OPTIONS_EXIT ;
-library_option : OPTION_KEY OPTION_SET OPTION_VALUE OPTION_END ;
+library_option : option_key OPTION_SET option_value OPTION_END ;
+
+option_key
+    : TEXT
+    ;
+    
+option_value
+    : TEXT
+    ;
 
 library_definition : LIBRARY name=IDENTIFIER '{' library_options? library_statement* '}' ;
 
