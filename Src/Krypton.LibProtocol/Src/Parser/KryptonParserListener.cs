@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Antlr4.Runtime;
 using Antlr4.StringTemplate.Misc;
 using Krypton.LibProtocol.Member;
+using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Operation;
 using Krypton.LibProtocol.Member.Type;
 
@@ -15,6 +16,7 @@ namespace Krypton.LibProtocol.Parser
         protected Stack<IPacketContainer> PacketContainers;
         protected Stack<IOperationContainer> OperationContainers;
         protected Stack<ITypeContainer> TypeContainers;
+        protected Stack<ICustomizable> Customizables;
 
         public KryptonParserListener(KPDLFile file)
         {
@@ -22,6 +24,7 @@ namespace Krypton.LibProtocol.Parser
             PacketContainers = new Stack<IPacketContainer>();
             OperationContainers = new Stack<IOperationContainer>();
             TypeContainers = new Stack<ITypeContainer>();
+            Customizables = new Stack<ICustomizable>();
         }
 
         public override void EnterImport_statement(KryptonParser.Import_statementContext context)
@@ -247,12 +250,21 @@ namespace Krypton.LibProtocol.Parser
             };
             
             File.Libraries.Add(library);
+            Customizables.Push(library);
             PacketContainers.Push(library);
         }
 
         public override void ExitLibrary_definition(KryptonParser.Library_definitionContext context)
         {
-            PacketContainers.Pop();
+            Customizables.Pop();
+            var library = (Library)PacketContainers.Pop();
+            
+            // Warn the user if the library wasnt assigned a namespace
+            if (library.Namespace == null)
+            {
+                Console.Out.WriteLine($"WARNING: The library {library.Name} wasn't assigned a namespace, using the default.");
+                library.Namespace = "Krypton.LibProtocol.Library";
+            }
         }
 
         #endregion
@@ -280,7 +292,20 @@ namespace Krypton.LibProtocol.Parser
             {
                 Name = context.name.Text
             };
+            
             File.AddGroup(group);
+        }
+
+        public override void EnterMember_option(KryptonParser.Member_optionContext context)
+        {
+            // todo: support more than string values
+            var customizable = Customizables.Peek();
+
+            var key = context.OPTION_KEY().GetText();
+            var value = context.option_value().STRING_VAL().GetText();
+            value = value.Substring(1, value.Length - 2);
+            
+            OptionUtil.ApplyOption(customizable, key, value);
         }
     }
 }

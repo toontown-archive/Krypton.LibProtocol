@@ -26,20 +26,7 @@ packet_definition : PACKET name=IDENTIFIER (':' packet_parent)?
 packet_parent : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parent)?
               ;
 
-// Library parsing
-
-library_options : OPTIONS OPTIONS_ENTER library_option* OPTIONS_EXIT ;
-library_option : option_key OPTION_SET option_value OPTION_END ;
-
-option_key
-    : TEXT
-    ;
-    
-option_value
-    : TEXT
-    ;
-
-library_definition : LIBRARY name=IDENTIFIER '{' library_options? library_statement* '}' ;
+library_definition : LIBRARY name=IDENTIFIER '{' member_options? library_statement* '}' ;
 
 library_statement
     : packet_definition
@@ -110,6 +97,16 @@ if_statement
 // todo
 expression
     : FALSE
+    ;
+
+// Member option parsing
+
+member_options : OPTIONS OPTIONS_ENTER member_option* OPTIONS_EXIT ;
+member_option : OPTION_KEY OPTION_SET option_value OPTION_END ;
+
+// tood: support more than just string values
+option_value
+    : STRING_VAL
     ;
 
 // Utility

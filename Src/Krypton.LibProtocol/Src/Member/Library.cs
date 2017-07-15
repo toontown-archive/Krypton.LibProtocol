@@ -1,16 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Library : IPacketContainer
+    public class Library : IPacketContainer, ICustomizable
     {
+        /// <summary>
+        /// The namespace containing the Libraries' packets and types
+        /// </summary>
+        [Option("namespace")]
+        public string Namespace { get; set; }
+        
         public IList<Packet> Packets { get; }
         public IList<TypeDeclaration> Types { get; }
         
-        public string Namespace => "Krypton.LibProtocol.Library." + Name;
-        
+        /// <summary>
+        /// The alias used to reference the Library inside the KPDL
+        /// </summary>
         public string Name { get; internal set; }
 
         public Library()

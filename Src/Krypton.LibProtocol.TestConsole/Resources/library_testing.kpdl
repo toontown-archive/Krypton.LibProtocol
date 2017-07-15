@@ -1,6 +1,6 @@
 library library_testing {
     options {
-        "namespace" = "Krypton.LibProtocol.Tests";
+        namespace: "Krypton.LibProtocol.Tests";
     }
 
     declare client_info<client_type> {

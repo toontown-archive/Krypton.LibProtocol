@@ -92,6 +92,8 @@ public class <type_name_builder(type.Name)> : KryptonType \<<type_name_builder(t
 >>
 
 library_declaration(library) ::= <<
+using Krypton.LibProtocol.Type;
+
 namespace <library.Namespace> {
 
     <library.Types:type_declaration(); separator="\n\n">

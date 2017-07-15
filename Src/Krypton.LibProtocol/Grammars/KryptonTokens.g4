@@ -7,7 +7,7 @@ PROTOCOL : 'protocol' ;
 PACKET : 'packet' ;
 DECLARE : 'declare' ;
 THIS : 'this' ;
-OPTIONS : 'options' -> pushMode(LIBRARY_OPTIONS);
+OPTIONS : 'options' -> pushMode(MEMBER_OPTIONS);
 KPDL : 'kpdl' ;
 
 PRIMITIVE 
@@ -76,7 +76,10 @@ BLOCK_COMMENT : '/*' .*? '*/' -> channel(HIDDEN) ;
 // skip whitespace
 WS : [ \t\r\n]+ -> skip ;
 
-mode LIBRARY_OPTIONS;
+/**
+    Member option lexing
+*/
+mode MEMBER_OPTIONS;
 OPTIONS_ENTER
   : LBRACKET
   ;
@@ -86,19 +89,30 @@ OPTIONS_EXIT
   ;
 
 OPTION_SET
-  : EQUALS
+  : COLON -> pushMode(MEMBER_OPTION)
   ;
 
+OPTION_KEY
+  : IDENTIFIER
+  ;
+ 
+MEMBER_OPTIONS_WS : WS -> skip ;
+
+mode MEMBER_OPTION;
 OPTION_END
-  : SEMICOLON
+  : SEMICOLON -> popMode
   ;
 
-TEXT
-  : '"' ~["\\].*? '"'
+STRING_VAL
+  : DOUBLEQUOTE .*? DOUBLEQUOTE
+  | SINGLEQUOTE .*? SINGLEQUOTE
   ;
 
-// skip whitespace
-LIBRARY_OPTIONS_WS : WS -> skip ;
+MEMBER_OPTION_SET_WS : WS -> skip ;
+
+/**
+    Expression lexing
+*/
 
 mode EXPRESSIONS;
 GREATER : LARROW ;

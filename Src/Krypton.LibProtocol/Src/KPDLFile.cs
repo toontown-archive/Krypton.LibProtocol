@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -46,9 +47,18 @@ namespace Krypton.LibProtocol
                 var tokens = new CommonTokenStream(lexer); 
                 var parser = new KryptonParser(tokens);
 
-                var walker = new KryptonParseTreeWalker();
+                var walker = new KryptonParseTreeWalker(filepath);
                 var listener = new KryptonParserListener(this);
-                walker.Walk(listener, parser.init());
+                
+                try
+                {
+                    walker.Walk(listener, parser.init());
+                }
+                // Rethrow any parser exceptions thrown while walking (avoids stack trace)
+                catch (KryptonParserException e)
+                {
+                    throw e;
+                }
             }
         }
     }
