@@ -42,36 +42,26 @@ library_statement
 
 type_reference 
     : primitive_type_reference
-    | generic_primitive_type_reference
     | declared_type_reference
-    | declared_generic_type_reference
     | local_type_reference
-    | local_generic_type_reference
     | generic_attribute_reference
     ;
 
 primitive_type_reference
     : PRIMITIVE
-    ;
-    
-generic_primitive_type_reference
-    : GENERIC_PRIMITIVE '<' type_reference (',' type_reference)* '>'
+    | GENERIC_PRIMITIVE generic_types?
     ;
 
 declared_type_reference
-    : namespace '::' IDENTIFIER
-    ;
-    
-declared_generic_type_reference
-    : namespace '::' IDENTIFIER '<' type_reference (',' type_reference)* '>'
+    : nsreference '::' IDENTIFIER generic_types?
     ;
     
 local_type_reference
-    : THIS '::' IDENTIFIER
+    : THIS '::' IDENTIFIER generic_types?
     ;
     
-local_generic_type_reference
-    : THIS '::' IDENTIFIER '<' type_reference (',' type_reference)* '>'
+generic_types
+    : '<' type_reference (',' type_reference)* '>'
     ;
 
 generic_attribute_reference
@@ -83,14 +73,9 @@ generic_attribute_reference
 type_declaration 
     : DECLARE IDENTIFIER generic_type_attributes? '{' operation_statement+ '}'
     ;
- 
         
 generic_type_attributes
-    : '<' generic_type_attribute (',' generic_type_attribute)* '>'
-    ;
-
-generic_type_attribute
-    : IDENTIFIER
+    : '<' IDENTIFIER (',' IDENTIFIER)* '>'
     ;
 
 // Operation statements
@@ -120,6 +105,10 @@ expression
     ;
 
 // Utility
+
+nsreference
+    : IDENTIFIER ('::' IDENTIFIER)*
+    ;
 
 namespace : IDENTIFIER ('.' IDENTIFIER)* 
           ;

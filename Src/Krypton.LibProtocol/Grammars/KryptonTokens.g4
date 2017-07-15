@@ -59,6 +59,8 @@ RPAREN : ')' ;
 FSLASH : '/' ;
 SINGLEQUOTE : '\'';
 DOUBLEQUOTE : '"';
+LARROW : '<' ;
+RARROW : '>' ;
 
 IDENTIFIER 
     : [A-Za-z_][A-Za-z_0-9]+ 
@@ -78,16 +80,16 @@ mode LIBRARY_OPTIONS;
 OPTIONS_ENTER
   : LBRACKET
   ;
-  
+ 
 OPTIONS_EXIT
   : RBRACKET -> popMode ;
 
 OPTION_KEY
-  : 'namespace'
+  : TEXT
   ;
   
 OPTION_VALUE 
-  : DOUBLEQUOTE IDENTIFIER DOUBLEQUOTE
+  : TEXT
   ;
 
 OPTION_SET
@@ -97,13 +99,17 @@ OPTION_SET
 OPTION_END
   : SEMICOLON
   ;
-  
+
+TEXT
+  : '"' ~["\\].*? '"'
+  ;
+
 // skip whitespace
 LIBRARY_OPTIONS_WS : WS -> skip ;
 
 mode EXPRESSIONS;
-GREATER : '>' ;
-LESS : '<' ;
+GREATER : LARROW ;
+LESS : RARROW ;
 EQUAL : '==' ;
 NOTEQUAL : '!=' ;
 GREATER_OR_EQUAL : '>=' ;

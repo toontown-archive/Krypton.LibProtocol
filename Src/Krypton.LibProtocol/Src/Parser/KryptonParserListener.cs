@@ -15,7 +15,6 @@ namespace Krypton.LibProtocol.Parser
         protected Stack<IPacketContainer> PacketContainers;
         protected Stack<IOperationContainer> OperationContainers;
         protected Stack<ITypeContainer> TypeContainers;
-        protected Stack<TypeName> TypeNames;
 
         public KryptonParserListener(KPDLFile file)
         {
@@ -23,7 +22,6 @@ namespace Krypton.LibProtocol.Parser
             PacketContainers = new Stack<IPacketContainer>();
             OperationContainers = new Stack<IOperationContainer>();
             TypeContainers = new Stack<ITypeContainer>();
-            TypeNames = new Stack<TypeName>();
         }
 
         public override void EnterImport_statement(KryptonParser.Import_statementContext context)
@@ -48,23 +46,24 @@ namespace Krypton.LibProtocol.Parser
                 Name = name
             };
 
+            var generics = context.generic_type_attributes()?.IDENTIFIER();
+            if (generics != null)
+            {
+                foreach (var g in generics)
+                {
+                    typeName.Generics.Add(g.GetText());
+                }
+            }
+
             declaration.Name = typeName;
             parent.AddType(declaration);
             
-            TypeNames.Push(typeName);
             OperationContainers.Push(declaration);
         }
 
         public override void ExitType_declaration(KryptonParser.Type_declarationContext context)
         {
-            TypeNames.Pop();
             OperationContainers.Pop();
-        }
-
-        public override void EnterGeneric_type_attribute(KryptonParser.Generic_type_attributeContext context)
-        {
-            var typeName = TypeNames.Peek();
-            typeName.Generics.Add(context.IDENTIFIER().GetText());
         }
 
         #endregion
@@ -73,83 +72,95 @@ namespace Krypton.LibProtocol.Parser
 
         public override void EnterPrimitive_type_reference(KryptonParser.Primitive_type_referenceContext context)
         {
-            var type = new PrimitiveTypeReference
-            {
-                Type = (Primitive) Enum.Parse(typeof(Primitive), context.PRIMITIVE().GetText(), true)
-            };
-
             var parent = TypeContainers.Peek();
-            parent.AcquireTypeReference(type);
-        }
-
-        public override void EnterDeclared_type_reference(KryptonParser.Declared_type_referenceContext context)
-        {
-            var type = new DeclaredTypeReference();
+            TypeReference reference;
             
-            var parent = TypeContainers.Peek();
-            parent.AcquireTypeReference(type);
+            if (context.generic_types() == null)
+            {
+                reference = new PrimitiveTypeReference
+                {
+                    Type = (Primitive) Enum.Parse(typeof(Primitive), context.PRIMITIVE().GetText(), true)
+                };
+            }
+            else
+            {
+                reference = new GenericPrimitiveTypeReference
+                {
+                    Type = (GenericPrimitive) Enum.Parse(typeof(GenericPrimitive), context.GENERIC_PRIMITIVE().GetText(), true)
+                };
+                TypeContainers.Push((ITypeContainer)reference);
+            }
+
+            parent.AcquireTypeReference(reference);
         }
 
-        public override void EnterDeclared_generic_type_reference(KryptonParser.Declared_generic_type_referenceContext context)
+        public override void ExitPrimitive_type_reference(KryptonParser.Primitive_type_referenceContext context)
         {
-            var parent = TypeContainers.Peek();
-            var type = new DeclaredGenericTypeReference
+            if (context.generic_types() != null)
             {
-                Name = context.IDENTIFIER().GetText()
-            };
-
-            parent.AcquireTypeReference(type);
-            TypeContainers.Push(type);
+                TypeContainers.Pop();
+            }
         }
         
-        public override void ExitDeclared_generic_type_reference(KryptonParser.Declared_generic_type_referenceContext context)
-        {
-            TypeContainers.Pop();
-        }
-
-        public override void EnterGeneric_primitive_type_reference(KryptonParser.Generic_primitive_type_referenceContext context)
+        public override void EnterDeclared_type_reference(KryptonParser.Declared_type_referenceContext context)
         {
             var parent = TypeContainers.Peek();
-            var type = new GenericPrimitiveTypeReference
-            {
-                Type = (GenericPrimitive) Enum.Parse(typeof(GenericPrimitive), context.GENERIC_PRIMITIVE().GetText(), true)
-            };
+            TypeReference reference;
 
-            parent.AcquireTypeReference(type);
-            TypeContainers.Push(type);
+            if (context.generic_types() == null)
+            {
+                reference = new DeclaredTypeReference();
+            }
+            else
+            {
+                reference = new DeclaredGenericTypeReference
+                {
+                    Name = context.IDENTIFIER().GetText()
+                };
+                TypeContainers.Push((ITypeContainer)reference);
+            }
+            
+            parent.AcquireTypeReference(reference);
         }
 
-        public override void ExitGeneric_primitive_type_reference(KryptonParser.Generic_primitive_type_referenceContext context)
+        public override void ExitDeclared_type_reference(KryptonParser.Declared_type_referenceContext context)
         {
-            TypeContainers.Pop();
+            if (context.generic_types() != null)
+            {
+                TypeContainers.Pop();
+            }
         }
 
         public override void EnterLocal_type_reference(KryptonParser.Local_type_referenceContext context)
         {
             var parent = TypeContainers.Peek();
-            var type = new LocalTypeReference
-            {
-                Name = context.IDENTIFIER().GetText()
-            };
+            TypeReference reference;
 
-            parent.AcquireTypeReference(type);
+            if (context.generic_types() == null)
+            {
+                reference = new LocalTypeReference
+                {
+                    Name = context.IDENTIFIER().GetText()
+                };
+            }
+            else
+            {
+                reference = new LocalGenericTypeReference
+                {
+                    Name = context.IDENTIFIER().GetText()
+                };
+                TypeContainers.Push((ITypeContainer)reference);
+            }
+
+            parent.AcquireTypeReference(reference);
         }
 
-        public override void EnterLocal_generic_type_reference(KryptonParser.Local_generic_type_referenceContext context)
+        public override void ExitLocal_type_reference(KryptonParser.Local_type_referenceContext context)
         {
-            var parent = TypeContainers.Peek();
-            var type = new LocalGenericTypeReference
+            if (context.generic_types() != null)
             {
-                Name = context.IDENTIFIER().GetText()
-            };
-
-            parent.AcquireTypeReference(type);
-            TypeContainers.Push(type);
-        }
-
-        public override void ExitLocal_generic_type_reference(KryptonParser.Local_generic_type_referenceContext context)
-        {
-            TypeContainers.Pop();
+                TypeContainers.Pop();
+            }
         }
 
         public override void EnterGeneric_attribute_reference(KryptonParser.Generic_attribute_referenceContext context)
