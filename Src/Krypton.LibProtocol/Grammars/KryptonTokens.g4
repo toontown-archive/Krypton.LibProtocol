@@ -10,19 +10,15 @@ THIS : 'this' ;
 OPTIONS : 'options' -> pushMode(MEMBER_OPTIONS);
 KPDL : 'kpdl' ;
 
-PRIMITIVE 
-  : BYTE 
-  | BOOL
+BUILTIN_TYPE 
+  : BOOL
+  | BYTE | BUFFER
   | INT8 | UINT8 
   | INT16 | UINT16
   | INT32 | UINT32
   | INT64 | UINT64
   | STRING | CSTRING
-  | BUFFER
-  ;
-
-GENERIC_PRIMITIVE
-  : ARRAY
+  | ARRAY
   ;
 
 fragment BYTE : 'byte' ;
@@ -108,7 +104,7 @@ STRING_VAL
   | SINGLEQUOTE .*? SINGLEQUOTE
   ;
 
-MEMBER_OPTION_SET_WS : WS -> skip ;
+MEMBER_OPTION_WS : WS -> skip ;
 
 /**
     Expression lexing

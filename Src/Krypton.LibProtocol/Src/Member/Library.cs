@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using Krypton.LibProtocol.Member.Common;
+using Krypton.LibProtocol.Member.Declared;
 using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Library : IPacketContainer, ICustomizable
+    public class Library : ICustomizable
     {
         /// <summary>
         /// The namespace containing the Libraries' packets and types
@@ -13,7 +14,7 @@ namespace Krypton.LibProtocol.Member
         public string Namespace { get; set; }
         
         public IList<Packet> Packets { get; }
-        public IList<TypeDeclaration> Types { get; }
+        public IList<IDeclaredType> Types { get; }
         
         /// <summary>
         /// The alias used to reference the Library inside the KPDL
@@ -23,10 +24,10 @@ namespace Krypton.LibProtocol.Member
         public Library()
         {
             Packets = new List<Packet>();
-            Types = new List<TypeDeclaration>();
+            Types = new List<IDeclaredType>();
         }
 
-        public void AddType(TypeDeclaration type)
+        public void AddType(IDeclaredType type)
         {
             Types.Add(type);
         }

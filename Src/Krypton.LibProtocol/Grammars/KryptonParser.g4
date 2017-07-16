@@ -36,19 +36,18 @@ library_statement
 // Types
 
 type_reference 
-    : primitive_type_reference
+    : builtin_type_reference
     | declared_type_reference
     | local_type_reference
     | generic_attribute_reference
     ;
 
-primitive_type_reference
-    : PRIMITIVE
-    | GENERIC_PRIMITIVE generic_types?
+builtin_type_reference
+    : BUILTIN_TYPE generic_types?
     ;
 
 declared_type_reference
-    : nsreference '::' IDENTIFIER generic_types?
+    : declared_namespace '::' IDENTIFIER generic_types?
     ;
     
 local_type_reference
@@ -61,6 +60,10 @@ generic_types
 
 generic_attribute_reference
     : IDENTIFIER
+    ;
+
+declared_namespace
+    : IDENTIFIER ('::' IDENTIFIER)*
     ;
 
 // Type declaration
@@ -110,10 +113,6 @@ option_value
     ;
 
 // Utility
-
-nsreference
-    : IDENTIFIER ('::' IDENTIFIER)*
-    ;
 
 namespace : IDENTIFIER ('.' IDENTIFIER)* 
           ;

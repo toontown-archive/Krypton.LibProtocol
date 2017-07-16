@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Antlr4.Runtime;
-using Antlr4.StringTemplate.Misc;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Common;
-using Krypton.LibProtocol.Member.Operation;
+using Krypton.LibProtocol.Member.Declared;
+using Krypton.LibProtocol.Member.Statement;
 using Krypton.LibProtocol.Member.Type;
+using Krypton.LibProtocol.Member.Type.Scope;
 
 namespace Krypton.LibProtocol.Parser
 {
@@ -13,17 +13,17 @@ namespace Krypton.LibProtocol.Parser
     {
         protected KPDLFile File;
 
-        protected Stack<IPacketContainer> PacketContainers;
-        protected Stack<IOperationContainer> OperationContainers;
-        protected Stack<ITypeContainer> TypeContainers;
+        protected Protocol ActiveProtocol;
+        protected Library ActiveLibrary;
+        protected Stack<StatementBlock> StatementBlocks;
         protected Stack<ICustomizable> Customizables;
+        internal Stack<ITypeParent> TypeParents;
 
         public KryptonParserListener(KPDLFile file)
         {
             File = file;
-            PacketContainers = new Stack<IPacketContainer>();
-            OperationContainers = new Stack<IOperationContainer>();
-            TypeContainers = new Stack<ITypeContainer>();
+            StatementBlocks = new Stack<StatementBlock>();
+            TypeParents = new Stack<ITypeParent>();
             Customizables = new Stack<ICustomizable>();
         }
 
@@ -40,183 +40,172 @@ namespace Krypton.LibProtocol.Parser
 
         public override void EnterType_declaration(KryptonParser.Type_declarationContext context)
         {
-            var parent = (Library)PacketContainers.Peek();
-
-            var name = context.IDENTIFIER().GetText();
-            var declaration = new TypeDeclaration();
-            var typeName = new TypeName
-            {
-                Name = name
-            };
+            IDeclaredType declaredType;
 
             var generics = context.generic_type_attributes()?.IDENTIFIER();
             if (generics != null)
             {
+                var genericType = new DeclaredGenericType(ActiveLibrary);
                 foreach (var g in generics)
                 {
-                    typeName.Generics.Add(g.GetText());
+                    genericType.Generics.Add(g.GetText());
                 }
+                declaredType = genericType;
+            }
+            else
+            {
+                declaredType = new DeclaredType(ActiveLibrary);
             }
 
-            declaration.Name = typeName;
-            parent.AddType(declaration);
-            
-            OperationContainers.Push(declaration);
+            var name = context.IDENTIFIER().GetText();
+            declaredType.Name = name;
+
+            ActiveLibrary.AddType(declaredType);
+            StatementBlocks.Push(declaredType.Statements);
         }
 
         public override void ExitType_declaration(KryptonParser.Type_declarationContext context)
         {
-            OperationContainers.Pop();
+            StatementBlocks.Pop();
         }
 
         #endregion
-        
+
         #region Type Reference
 
-        public override void EnterPrimitive_type_reference(KryptonParser.Primitive_type_referenceContext context)
+        public override void EnterBuiltin_type_reference(KryptonParser.Builtin_type_referenceContext context)
         {
-            var parent = TypeContainers.Peek();
-            TypeReference reference;
+            var parent = TypeParents.Peek();
+
+            var scope = new BuiltinScope();
+            IType type;
             
-            if (context.generic_types() == null)
+            var generics = context.generic_types();
+            if (generics == null)
             {
-                reference = new PrimitiveTypeReference
-                {
-                    Type = (Primitive) Enum.Parse(typeof(Primitive), context.PRIMITIVE().GetText(), true)
-                };
+                type = new Member.Type.Type();
             }
             else
             {
-                reference = new GenericPrimitiveTypeReference
-                {
-                    Type = (GenericPrimitive) Enum.Parse(typeof(GenericPrimitive), context.GENERIC_PRIMITIVE().GetText(), true)
-                };
-                TypeContainers.Push((ITypeContainer)reference);
+                type = new GenericType();
+                TypeParents.Push((ITypeParent)type);
             }
+            type.Name = context.BUILTIN_TYPE().GetText();
 
-            parent.AcquireTypeReference(reference);
-        }
-
-        public override void ExitPrimitive_type_reference(KryptonParser.Primitive_type_referenceContext context)
-        {
-            if (context.generic_types() != null)
+            var typeRef = new TypeReference
             {
-                TypeContainers.Pop();
-            }
+                Type = type,
+                Scope = scope
+            };
+            
+            parent.AcquireType(typeRef);
         }
-        
+
         public override void EnterDeclared_type_reference(KryptonParser.Declared_type_referenceContext context)
         {
-            var parent = TypeContainers.Peek();
-            TypeReference reference;
+            var parent = TypeParents.Peek();
 
-            if (context.generic_types() == null)
+            var scope = new DeclaredScope();
+            IType type;
+            
+            var generics = context.generic_types();
+            if (generics == null)
             {
-                reference = new DeclaredTypeReference();
+                type = new Member.Type.Type();
             }
             else
             {
-                reference = new DeclaredGenericTypeReference
-                {
-                    Name = context.IDENTIFIER().GetText()
-                };
-                TypeContainers.Push((ITypeContainer)reference);
+                type = new GenericType();
+                TypeParents.Push((ITypeParent)type);
             }
-            
-            parent.AcquireTypeReference(reference);
-        }
+            type.Name = context.IDENTIFIER().GetText();
 
-        public override void ExitDeclared_type_reference(KryptonParser.Declared_type_referenceContext context)
-        {
-            if (context.generic_types() != null)
+            var typeRef = new TypeReference
             {
-                TypeContainers.Pop();
-            }
+                Type = type,
+                Scope = scope
+            };
+            
+            parent.AcquireType(typeRef);
         }
 
         public override void EnterLocal_type_reference(KryptonParser.Local_type_referenceContext context)
         {
-            var parent = TypeContainers.Peek();
-            TypeReference reference;
+            var parent = TypeParents.Peek();
 
-            if (context.generic_types() == null)
+            var scope = new LocalScope();
+            IType type;
+            
+            var generics = context.generic_types();
+            if (generics == null)
             {
-                reference = new LocalTypeReference
-                {
-                    Name = context.IDENTIFIER().GetText()
-                };
+                type = new Member.Type.Type();
             }
             else
             {
-                reference = new LocalGenericTypeReference
-                {
-                    Name = context.IDENTIFIER().GetText()
-                };
-                TypeContainers.Push((ITypeContainer)reference);
+                type = new GenericType();
+                TypeParents.Push((ITypeParent)type);
             }
+            type.Name = context.IDENTIFIER().GetText();
 
-            parent.AcquireTypeReference(reference);
-        }
-
-        public override void ExitLocal_type_reference(KryptonParser.Local_type_referenceContext context)
-        {
-            if (context.generic_types() != null)
+            var typeRef = new TypeReference
             {
-                TypeContainers.Pop();
-            }
+                Type = type,
+                Scope = scope
+            };
+            
+            parent.AcquireType(typeRef);
         }
 
         public override void EnterGeneric_attribute_reference(KryptonParser.Generic_attribute_referenceContext context)
         {
-            var parent = TypeContainers.Peek();
-            var type = new GenericAttributeReference
+            var parent = TypeParents.Peek();
+
+            var scope = new LocalScope();
+            var type = new GenericAttribute
             {
                 Name = context.IDENTIFIER().GetText()
             };
 
-            parent.AcquireTypeReference(type);
+            var typeRef = new TypeReference
+            {
+                Type = type,
+                Scope = scope
+            };
+            
+            parent.AcquireType(typeRef);
         }
-        
+
+        public override void ExitGeneric_types(KryptonParser.Generic_typesContext context)
+        {
+            TypeParents.Pop();
+        }
+
         #endregion
 
         #region Operation Statements
-        
+
         public override void EnterData_statement(KryptonParser.Data_statementContext context)
         {
-            var operation = new DataOperation
+            var operation = new TypeStatement
             {
                 Name = context.IDENTIFIER().GetText()
             };
-            TypeContainers.Push(operation);
+            TypeParents.Push(operation);
             
-            var container = OperationContainers.Peek();
-            container.AddOperation(operation);
+            var container = StatementBlocks.Peek();
+            container.AddStatement(operation);
         }
 
         public override void ExitData_statement(KryptonParser.Data_statementContext context)
         {
-            TypeContainers.Pop();
-        }
-
-        public override void EnterIf_statement(KryptonParser.If_statementContext context)
-        {
-            var parent = OperationContainers.Peek();
-            
-            var operation = new IfOperation();
-            parent.AddOperation(operation);
-            
-            OperationContainers.Push(operation);
-        }
-
-        public override void ExitIf_statement(KryptonParser.If_statementContext context)
-        {
-            OperationContainers.Pop();
+            TypeParents.Pop();
         }
 
         #endregion
 
         #region Protocols
-        
+
         public override void EnterProtocol_definition(KryptonParser.Protocol_definitionContext context)
         {
             var protocol = new Protocol
@@ -224,18 +213,18 @@ namespace Krypton.LibProtocol.Parser
                 Name = context.name.Text,
                 Namespace = context.ns.GetText()
             };
-            PacketContainers.Push(protocol);
+            ActiveProtocol = protocol;
         }
 
         public override void ExitProtocol_definition(KryptonParser.Protocol_definitionContext context)
         {
-            PacketContainers.Pop();
+            ActiveProtocol = null;
         }
 
         public override void EnterMessage_definitions(KryptonParser.Message_definitionsContext context)
         {
-            var parent = (Protocol) PacketContainers.Peek();
-            parent.AddMessage(context.name.Text);
+            var protocol = ActiveProtocol;
+            protocol.AddMessage(context.name.Text);
         }
 
         #endregion
@@ -251,13 +240,13 @@ namespace Krypton.LibProtocol.Parser
             
             File.Libraries.Add(library);
             Customizables.Push(library);
-            PacketContainers.Push(library);
+            ActiveLibrary = library;
         }
 
         public override void ExitLibrary_definition(KryptonParser.Library_definitionContext context)
         {
             Customizables.Pop();
-            var library = (Library)PacketContainers.Pop();
+            var library = ActiveLibrary;
             
             // Warn the user if the library wasnt assigned a namespace
             if (library.Namespace == null)
@@ -265,25 +254,26 @@ namespace Krypton.LibProtocol.Parser
                 Console.Out.WriteLine($"WARNING: The library {library.Name} wasn't assigned a namespace, using the default.");
                 library.Namespace = "Krypton.LibProtocol.Library";
             }
+
+            ActiveLibrary = null;
         }
 
         #endregion
         
         public override void EnterPacket_definition(KryptonParser.Packet_definitionContext context)
         {
-            var parent = PacketContainers.Peek();
             var container = new Packet
             {
                 Name = context.name.Text
             };
             
-            parent.AddPacket(container);
-            OperationContainers.Push(container);
+            ActiveProtocol.AddPacket(container);
+            StatementBlocks.Push(container.Statements);
         }
         
         public override void ExitPacket_definition(KryptonParser.Packet_definitionContext context)
         {
-            OperationContainers.Pop();
+            StatementBlocks.Pop();
         }
 
         public override void EnterGroup_definition(KryptonParser.Group_definitionContext context)

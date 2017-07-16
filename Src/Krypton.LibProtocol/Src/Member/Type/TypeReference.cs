@@ -1,13 +1,14 @@
-﻿using Krypton.LibProtocol.Extensions;
+﻿using Krypton.LibProtocol.Member.Type.Scope;
 
 namespace Krypton.LibProtocol.Member.Type
 {
-    public abstract class TypeReference
+    /// <summary>
+    /// A TypeReference contains information on a Type and its Scope.
+    /// The Scope is relative to the context it is beclared in.
+    /// </summary>
+    public class TypeReference
     {
-        public abstract string Name { get; internal set; }
-        public string CamelCaseName => Name.ToCamelCase();
-        public virtual bool Attribute => false;
-        
-        public abstract string TemplateAlias { get; }
+        public IType Type { get; internal set; }
+        public ITypeScope Scope { get; internal set; }
     }
 }

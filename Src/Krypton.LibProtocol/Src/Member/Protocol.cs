@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using Krypton.LibProtocol.Member.Declared;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Protocol : IPacketContainer
+    public class Protocol
     {        
         public string Name { get; internal set; }
         public string Namespace { get; internal set; }
