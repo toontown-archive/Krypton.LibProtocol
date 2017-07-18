@@ -1,16 +1,16 @@
 ﻿using System.IO;
 using Antlr4.StringTemplate;
+using Krypton.LibProtocol.File;
 
 namespace Krypton.LibProtocol.Target
 {
-    public abstract class LanguageTargetGenerator<TS> 
-        where TS: ILanguageTargetSettings
+    public abstract class LanguageGenerator<TS>
     {
         protected abstract string TemplatesPath { get; }
 
-        protected KPDLFile File { get; }
+        protected DefinitionFile File { get; }
 
-        protected LanguageTargetGenerator(KPDLFile file)
+        protected LanguageGenerator(DefinitionFile file)
         {
             File = file;
         }

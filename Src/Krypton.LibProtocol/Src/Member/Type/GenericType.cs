@@ -1,22 +1,26 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Krypton.LibProtocol.Member.Type.Layer;
 using Krypton.LibProtocol.Parser;
 
 namespace Krypton.LibProtocol.Member.Type
 {
-    public class GenericType : IType, ITypeParent
+    public class GenericType : IType, IGenericType, ITypeReferenceContainer
     {
-        public string Name { get; set; }
+        public string Name { get; }
+        public IEnumerable<ITypeReference> Generics { get; }
         
-        public IList<TypeReference> Types { get; }
+        private readonly IList<ITypeReference> _generics = new List<ITypeReference>();
 
-        internal GenericType()
+        internal GenericType(string name)
         {
-            Types = new List<TypeReference>();
+            Name = name;
+            Generics = new ReadOnlyCollection<ITypeReference>(_generics);
         }
-
-        public void AcquireType(TypeReference type)
+        
+        public void AddTypeReference(ITypeReference type)
         {
-            Types.Add(type);
+            throw new System.NotImplementedException();
         }
     }
 }

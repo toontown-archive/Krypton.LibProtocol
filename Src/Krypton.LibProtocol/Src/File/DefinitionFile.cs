@@ -1,34 +1,34 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using Antlr4.Runtime;
-using Krypton.LibProtocol.Member;
+using Krypton.LibProtocol.File.Util;
+using Krypton.LibProtocol.Member.Layer;
 using Krypton.LibProtocol.Parser;
 
-namespace Krypton.LibProtocol
+namespace Krypton.LibProtocol.File
 {
-    public class KPDLFile
+    public class DefinitionFile : IMemberContainer
     {
-        public FileResolver Includes { get; }
-        public IList<Group> Groups { get; }
-        
-        public IList<Library> Libraries { get; }
-        
-        public KPDLFile()
+        public IFileResolver Resolver { get; }
+        public IEnumerable<IMember> Members { get; }
+        private readonly IList<IMember> _members = new List<IMember>();
+
+        public DefinitionFile(IFileResolver resolver)
         {
-            Includes = new FileResolver();
-            Groups = new List<Group>();
-            Libraries = new List<Library>();
+            Resolver = resolver;
+            Members = new ReadOnlyCollection<IMember>(_members); 
         }
 
-        internal void AddLibrary(Library library)
+        public DefinitionFile()
         {
-            Libraries.Add(library);
+            Resolver = new ContextualFileResolver();
+            Members = new ReadOnlyCollection<IMember>(_members);
         }
-
-        internal void AddGroup(Group group)
+        
+        public void AddMember(IMember member)
         {
-            group.Id = Groups.Count;
-            Groups.Add(group);
+            _members.Add(member);
         }
         
         /// <summary> 
@@ -37,7 +37,7 @@ namespace Krypton.LibProtocol
         /// <param name="filepath">Path to the kpdl file</param> 
         public void Load(string filepath) 
         { 
-            filepath = Includes.Resolve(filepath); 
+            filepath = Resolver.Resolve(filepath); 
             using (var fs = new FileStream(filepath, FileMode.Open)) 
             { 
                 var inputStream = new AntlrInputStream(fs);

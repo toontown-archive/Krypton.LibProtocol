@@ -1,19 +1,23 @@
 ﻿using System.Collections.Generic;
+using Krypton.LibProtocol.Member.Common;
+using Krypton.LibProtocol.Member.Layer;
 using Krypton.LibProtocol.Member.Statement;
 
 namespace Krypton.LibProtocol.Member.Declared
 {
-    public class Packet
+    public class Packet : IMember, IMemberContainer, ICustomizable
     {
-        public IList<Packet> Parents { get; }
-        public string Name { get; internal set; }
-        
-        public StatementBlock Statements { get; }
-
-        public Packet()
+        public string Name { get; }
+        public IMemberContainer Parent { get; }
+        public bool AssignParent(IMemberContainer parent)
         {
-            Parents = new List<Packet>();
-            Statements = new StatementBlock();
+            throw new System.NotImplementedException();
+        }
+
+        public IEnumerable<IMember> Members { get; }
+        public void AddMember(IMember member)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

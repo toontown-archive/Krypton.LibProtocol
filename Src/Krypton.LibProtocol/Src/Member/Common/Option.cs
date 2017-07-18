@@ -7,15 +7,15 @@ namespace Krypton.LibProtocol.Member.Common
 {
     public class OptionAttribute : Attribute 
     {
-        public OptionAttribute(string name)
-        {
-            Name = name;
-        }
-
         /// <summary>
         /// The name of the option
         /// </summary>
-        public string Name { get; }
+        public readonly string Name;
+        
+        internal OptionAttribute(string name)
+        {
+            Name = name;
+        }
     }
 
     /// <summary>

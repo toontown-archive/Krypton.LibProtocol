@@ -1,30 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
+using Krypton.LibProtocol.File;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Declared;
+using Krypton.LibProtocol.Member.Declared.Type;
 using Krypton.LibProtocol.Member.Statement;
 using Krypton.LibProtocol.Member.Type;
+using Krypton.LibProtocol.Member.Type.Layer;
 using Krypton.LibProtocol.Member.Type.Scope;
 
 namespace Krypton.LibProtocol.Parser
 {
     public class KryptonParserListener : KryptonParserBaseListener
     {
-        protected KPDLFile File;
+        private readonly DefinitionFile _file;
 
-        protected Protocol ActiveProtocol;
-        protected Library ActiveLibrary;
-        protected Stack<StatementBlock> StatementBlocks;
-        protected Stack<ICustomizable> Customizables;
-        internal Stack<ITypeParent> TypeParents;
+        private Protocol _activeProtocol;
+        private Library _activeLibrary;
+        private readonly Stack<StatementBlock> _statementBlocks;
+        private readonly Stack<ICustomizable> _customizables;
+        private readonly Stack<ITypeReferenceContainer> _typeParents;
 
-        public KryptonParserListener(KPDLFile file)
+        public KryptonParserListener(DefinitionFile file)
         {
-            File = file;
-            StatementBlocks = new Stack<StatementBlock>();
-            TypeParents = new Stack<ITypeParent>();
-            Customizables = new Stack<ICustomizable>();
+            _file = file;
+            _statementBlocks = new Stack<StatementBlock>();
+            _typeParents = new Stack<ITypeReferenceContainer>();
+            _customizables = new Stack<ICustomizable>();
         }
 
         public override void EnterImport_statement(KryptonParser.Import_statementContext context)
@@ -33,19 +36,20 @@ namespace Krypton.LibProtocol.Parser
             var filename = context.file.Text;
             var filepath = $"{dir}{filename}.kpdl";
             
-            File.Load(filepath);
+            _file.Load(filepath);
         }
 
         #region Type Declaration
 
         public override void EnterType_declaration(KryptonParser.Type_declarationContext context)
         {
-            IDeclaredType declaredType;
+            DeclaredTypeBase declaredType;
+            var name = context.IDENTIFIER().GetText();
 
             var generics = context.generic_type_attributes()?.IDENTIFIER();
             if (generics != null)
             {
-                var genericType = new DeclaredGenericType(ActiveLibrary);
+                var genericType = new DeclaredGenericType(name, _activeLibrary);
                 foreach (var g in generics)
                 {
                     genericType.Generics.Add(g.GetText());
@@ -54,19 +58,16 @@ namespace Krypton.LibProtocol.Parser
             }
             else
             {
-                declaredType = new DeclaredType(ActiveLibrary);
+                declaredType = new DeclaredType(name, _activeLibrary);
             }
 
-            var name = context.IDENTIFIER().GetText();
-            declaredType.Name = name;
-
-            ActiveLibrary.AddType(declaredType);
-            StatementBlocks.Push(declaredType.Statements);
+            _activeLibrary.AddType(declaredType);
+            _statementBlocks.Push(declaredType.Statements);
         }
 
         public override void ExitType_declaration(KryptonParser.Type_declarationContext context)
         {
-            StatementBlocks.Pop();
+            _statementBlocks.Pop();
         }
 
         #endregion
@@ -75,110 +76,126 @@ namespace Krypton.LibProtocol.Parser
 
         public override void EnterBuiltin_type_reference(KryptonParser.Builtin_type_referenceContext context)
         {
-            var parent = TypeParents.Peek();
+            var parent = _typeParents.Peek();
 
+            var name = context.BUILTIN_TYPE().GetText();
             var scope = new BuiltinScope();
-            IType type;
+            TypeBase type;
             
             var generics = context.generic_types();
             if (generics == null)
             {
-                type = new Member.Type.Type();
+                type = new Member.Type.ConcreteType(name);
             }
             else
             {
-                type = new GenericType();
-                TypeParents.Push((ITypeParent)type);
+                type = new GenericType(name);
+                _typeParents.Push((ITypeReferenceContainer)type);
             }
-            type.Name = context.BUILTIN_TYPE().GetText();
 
-            var typeRef = new TypeReference
+            var typeRef = new DeclaredTypeReference
             {
                 Type = type,
                 Scope = scope
             };
             
-            parent.AcquireType(typeRef);
+            parent.AddTypeReference(typeRef);
         }
 
         public override void EnterDeclared_type_reference(KryptonParser.Declared_type_referenceContext context)
         {
-            var parent = TypeParents.Peek();
+            var parent = _typeParents.Peek();
+            var name = context.IDENTIFIER().GetText();
+            
+            // resolve the scope the type is in
+            var libName = context.declared_namespace().GetText();
+            var library = _file.ResolveLibrary(libName);
+            if (library == null)
+            {
+                throw new KryptonParserException($"Unknown library \"{libName}\"");
+            }
 
-            var scope = new DeclaredScope();
-            IType type;
+            // resolve the type declaration
+            var decl = library.ResolveType(name);
+            if (decl == null)
+            {
+                throw new KryptonParserException($"Reference to unknown type \"{name}\"");
+            }
+
+            var scope = new DeclaredScope
+            {
+                Library = library
+            };
+            TypeBase type;
             
             var generics = context.generic_types();
             if (generics == null)
             {
-                type = new Member.Type.Type();
+                type = new Member.Type.ConcreteType(name);
             }
             else
             {
-                type = new GenericType();
-                TypeParents.Push((ITypeParent)type);
+                type = new GenericType(name);
+                _typeParents.Push((ITypeReferenceContainer)type);
             }
-            type.Name = context.IDENTIFIER().GetText();
 
-            var typeRef = new TypeReference
+            var typeRef = new DeclaredTypeReference
             {
                 Type = type,
                 Scope = scope
             };
             
-            parent.AcquireType(typeRef);
+            parent.AddTypeReference(typeRef);
         }
 
         public override void EnterLocal_type_reference(KryptonParser.Local_type_referenceContext context)
         {
-            var parent = TypeParents.Peek();
+            var parent = _typeParents.Peek();
 
-            var scope = new LocalScope();
-            IType type;
+            var name = context.IDENTIFIER().GetText();
+            var scope = new ActiveScope();
+            TypeBase type;
             
             var generics = context.generic_types();
             if (generics == null)
             {
-                type = new Member.Type.Type();
+                type = new Member.Type.ConcreteType(name);
             }
             else
             {
-                type = new GenericType();
-                TypeParents.Push((ITypeParent)type);
+                type = new GenericType(name);
+                _typeParents.Push((ITypeReferenceContainer)type);
             }
-            type.Name = context.IDENTIFIER().GetText();
-
-            var typeRef = new TypeReference
+            
+            var typeRef = new DeclaredTypeReference
             {
                 Type = type,
                 Scope = scope
             };
             
-            parent.AcquireType(typeRef);
+            parent.AddTypeReference(typeRef);
         }
 
         public override void EnterGeneric_attribute_reference(KryptonParser.Generic_attribute_referenceContext context)
         {
-            var parent = TypeParents.Peek();
+            var parent = _typeParents.Peek();
 
-            var scope = new LocalScope();
-            var type = new GenericAttribute
-            {
-                Name = context.IDENTIFIER().GetText()
-            };
+            var name = context.IDENTIFIER().GetText();
+            var scope = new ActiveScope();
+            var type = new GenericAttribute(name);
 
-            var typeRef = new TypeReference
+            var typeRef = new DeclaredTypeReference
             {
                 Type = type,
                 Scope = scope
             };
-            
-            parent.AcquireType(typeRef);
+
+            parent.AddTypeReference(typeRef);
         }
 
         public override void ExitGeneric_types(KryptonParser.Generic_typesContext context)
         {
-            TypeParents.Pop();
+            _typeParents.Pop();
         }
 
         #endregion
@@ -187,19 +204,17 @@ namespace Krypton.LibProtocol.Parser
 
         public override void EnterData_statement(KryptonParser.Data_statementContext context)
         {
-            var operation = new TypeStatement
-            {
-                Name = context.IDENTIFIER().GetText()
-            };
-            TypeParents.Push(operation);
+            var name = context.IDENTIFIER().GetText();
+            var operation = new TypeStatement(name);
+            _typeParents.Push(operation);
             
-            var container = StatementBlocks.Peek();
+            var container = _statementBlocks.Peek();
             container.AddStatement(operation);
         }
 
         public override void ExitData_statement(KryptonParser.Data_statementContext context)
         {
-            TypeParents.Pop();
+            _typeParents.Pop();
         }
 
         #endregion
@@ -213,17 +228,17 @@ namespace Krypton.LibProtocol.Parser
                 Name = context.name.Text,
                 Namespace = context.ns.GetText()
             };
-            ActiveProtocol = protocol;
+            _activeProtocol = protocol;
         }
 
         public override void ExitProtocol_definition(KryptonParser.Protocol_definitionContext context)
         {
-            ActiveProtocol = null;
+            _activeProtocol = null;
         }
 
         public override void EnterMessage_definitions(KryptonParser.Message_definitionsContext context)
         {
-            var protocol = ActiveProtocol;
+            var protocol = _activeProtocol;
             protocol.AddMessage(context.name.Text);
         }
 
@@ -233,20 +248,24 @@ namespace Krypton.LibProtocol.Parser
         
         public override void EnterLibrary_definition(KryptonParser.Library_definitionContext context)
         {
-            var library = new Library
-            {
-                Name = context.name.Text
-            };
+            var library = new Library(context.name.Text);
             
-            File.Libraries.Add(library);
-            Customizables.Push(library);
-            ActiveLibrary = library;
+            // Check to see if this library has already been defined
+            var dup = _file.ResolveLibrary(library.Name);
+            if (dup != null)
+            {
+                throw new KryptonParserException($"Duplicate definition of Library \"{library.Name}\".");
+            }
+
+            _file.Libraries.Add(library);
+            _customizables.Push(library);
+            _activeLibrary = library;
         }
 
         public override void ExitLibrary_definition(KryptonParser.Library_definitionContext context)
         {
-            Customizables.Pop();
-            var library = ActiveLibrary;
+            _customizables.Pop();
+            var library = _activeLibrary;
             
             // Warn the user if the library wasnt assigned a namespace
             if (library.Namespace == null)
@@ -255,7 +274,7 @@ namespace Krypton.LibProtocol.Parser
                 library.Namespace = "Krypton.LibProtocol.Library";
             }
 
-            ActiveLibrary = null;
+            _activeLibrary = null;
         }
 
         #endregion
@@ -267,13 +286,13 @@ namespace Krypton.LibProtocol.Parser
                 Name = context.name.Text
             };
             
-            ActiveProtocol.AddPacket(container);
-            StatementBlocks.Push(container.Statements);
+            _activeProtocol.AddPacket(container);
+            _statementBlocks.Push(container.Statements);
         }
         
         public override void ExitPacket_definition(KryptonParser.Packet_definitionContext context)
         {
-            StatementBlocks.Pop();
+            _statementBlocks.Pop();
         }
 
         public override void EnterGroup_definition(KryptonParser.Group_definitionContext context)
@@ -283,13 +302,13 @@ namespace Krypton.LibProtocol.Parser
                 Name = context.name.Text
             };
             
-            File.AddGroup(group);
+            _file.AddGroup(group);
         }
 
         public override void EnterMember_option(KryptonParser.Member_optionContext context)
         {
             // todo: support more than string values
-            var customizable = Customizables.Peek();
+            var customizable = _customizables.Peek();
 
             var key = context.OPTION_KEY().GetText();
             var value = context.option_value().STRING_VAL().GetText();

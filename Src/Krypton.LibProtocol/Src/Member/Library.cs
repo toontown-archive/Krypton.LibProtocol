@@ -1,40 +1,45 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Declared;
+using Krypton.LibProtocol.Member.Declared.Type;
+using Krypton.LibProtocol.Member.Layer;
 using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Library : ICustomizable
+    public class Library : IMember, IMemberContainer, ICustomizable
     {
         /// <summary>
         /// The namespace containing the Libraries' packets and types
         /// </summary>
         [Option("namespace")]
-        public string Namespace { get; set; }
-        
-        public IList<Packet> Packets { get; }
-        public IList<IDeclaredType> Types { get; }
-        
+        public string Namespace { get; internal set; }
+
         /// <summary>
         /// The alias used to reference the Library inside the KPDL
         /// </summary>
-        public string Name { get; internal set; }
+        public string Name { get; }
 
-        public Library()
+        /// <summary>
+        /// The Parent of the type
+        /// </summary>
+        public IMemberContainer Parent { get; internal set; }
+
+        public IEnumerable<IMember> Members { get; }
+        private readonly IList<IMember> _members;
+
+        internal Library(string name)
         {
-            Packets = new List<Packet>();
-            Types = new List<IDeclaredType>();
+            Name = name;
+            _members = new List<IMember>();
+            Members = new ReadOnlyCollection<IMember>(_members);
         }
 
-        public void AddType(IDeclaredType type)
+        public void AddMember(IMember member)
         {
-            Types.Add(type);
-        }
-
-        public void AddPacket(Packet packet)
-        {
-            Packets.Add(packet);
+            _members.Add(member);
         }
     }
 }

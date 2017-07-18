@@ -1,6 +1,6 @@
 ﻿namespace Krypton.LibProtocol.Target.CSharp
 {
-    public struct CSharpTargetSettings : ILanguageTargetSettings
+    public struct CSharpTargetSettings
     {
         public string OutDirectory { get; set; }   
     }

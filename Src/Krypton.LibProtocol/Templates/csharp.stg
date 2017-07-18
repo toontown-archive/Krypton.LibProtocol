@@ -1,0 +1,30 @@
+type_declaration(typedef) ::= <<
+
+>>
+
+library_declaration(library) ::= <<
+using Krypton.LibProtocol.Type;
+
+namespace <library.Namespace> {
+
+    <library.Types:type_declaration(); separator="\n\n">
+}
+>>
+
+// Builtin types to their perspective class names
+builtin_type ::= [
+    "byte": "KryptonByte",
+    "bool": "KryptonBool",
+    "int8": "KryptonInt8",
+    "uint8": "KryptonUInt8",
+    "int16": "KryptonInt16",
+    "uint16": "KryptonUInt16",
+    "int32": "KryptonInt32",
+    "uint32": "KryptonUInt32",
+    "int64": "KryptonInt64",
+    "uint64": "KryptonUInt64",
+    "string": "KryptonString",
+    "cstring": "KryptonCString",
+    "buffer": "KryptonBuffer",
+    "array": "KryptonArray"
+]
