@@ -1,30 +1,38 @@
 ﻿using System.Collections.Generic;
-using Krypton.LibProtocol.Member.Declared;
+using System.Collections.ObjectModel;
+using Krypton.LibProtocol.Member.Layer;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Protocol
+    public class Protocol : IMember, IMemberContainer
     {        
-        public string Name { get; internal set; }
-        public string Namespace { get; internal set; }
-        
-        public IList<Packet> Packets { get; }
-        public IList<string> Messages { get; }
+        public string Name { get; }
+        public IMemberContainer Parent { get; }
+        public IEnumerable<IMember> Members { get; }
+        private readonly IList<IMember> _members = new List<IMember>();
 
-        public Protocol()
+        public Protocol(string name, IMemberContainer parent)
         {
-            Packets = new List<Packet>();
-            Messages = new List<string>();
+            Name = name;
+            Parent = parent;
+            Members = new ReadOnlyCollection<IMember>(_members);
         }
         
-        public void AddPacket(Packet packet)
+        public void AddMember(IMember member)
         {
-            Packets.Add(packet);
+            _members.Add(member);
         }
+    }
+    
+    public class Message : IMember
+    {
+        public string Name { get; }
+        public IMemberContainer Parent { get; }
 
-        public void AddMessage(string message)
+        public Message(string name, IMemberContainer parent)
         {
-            Messages.Add(message);
+            Name = name;
+            Parent = parent;
         }
     }
 }

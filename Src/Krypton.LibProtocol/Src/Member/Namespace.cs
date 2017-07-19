@@ -16,7 +16,7 @@ namespace Krypton.LibProtocol.Member
         /// <summary>
         /// The alias used to reference the Library inside the KPDL
         /// </summary>
-        public string Name { get; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// The Parent of the type
@@ -26,9 +26,8 @@ namespace Krypton.LibProtocol.Member
         public IEnumerable<IMember> Members { get; }
         private readonly IList<IMember> _members = new List<IMember>();
 
-        internal Namespace(string name)
+        internal Namespace()
         {
-            Name = name;
             Members = new ReadOnlyCollection<IMember>(_members);
         }
 

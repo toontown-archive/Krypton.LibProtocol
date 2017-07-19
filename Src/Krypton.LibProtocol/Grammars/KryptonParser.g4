@@ -17,11 +17,11 @@ group_definition
     ;
 
 protocol_definition 
-    : PROTOCOL IDENTIFIER '{' message_definitions? packet_definition* '}' 
+    : PROTOCOL IDENTIFIER '{' message_definition? packet_definition* '}' 
     ;
 
-message_definitions 
-    : IDENTIFIER (',' message_definitions)?
+message_definition 
+    : IDENTIFIER (',' message_definition)?
     ;
 
 packet_definition 

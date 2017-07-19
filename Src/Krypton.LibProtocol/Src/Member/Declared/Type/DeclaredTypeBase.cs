@@ -26,8 +26,6 @@ namespace Krypton.LibProtocol.Member.Declared.Type
         /// The Parent of the declared type
         /// </summary>
         public IMemberContainer Parent { get; }
-
-        public string Namespace => Parent.ToString();
         
         /// <summary>
         /// The statements that compose the type
