@@ -18,13 +18,6 @@ namespace Krypton.LibProtocol.Member.Common
         }
     }
 
-    /// <summary>
-    /// Interface used by customizable KPDL members
-    /// </summary>
-    public interface ICustomizable
-    {
-    }
-    
     public static class OptionUtil
     {
         public static void ApplyOption(ICustomizable customizable, string name, object value)

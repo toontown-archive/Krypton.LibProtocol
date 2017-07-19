@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Krypton.LibProtocol.Member.Type.Layer;
 using Krypton.LibProtocol.Parser;
 
 namespace Krypton.LibProtocol.Member.Type
@@ -20,7 +19,7 @@ namespace Krypton.LibProtocol.Member.Type
         
         public void AddTypeReference(ITypeReference type)
         {
-            throw new System.NotImplementedException();
+            _generics.Add(type);
         }
     }
 }

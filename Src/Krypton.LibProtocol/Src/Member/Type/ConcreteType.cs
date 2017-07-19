@@ -1,5 +1,4 @@
 ﻿using Krypton.LibProtocol.Extensions;
-using Krypton.LibProtocol.Member.Type.Layer;
 
 namespace Krypton.LibProtocol.Member.Type
 {
@@ -15,7 +14,7 @@ namespace Krypton.LibProtocol.Member.Type
         /// </summary>
         public string CamelCaseName => Name.ToCamelCase();
 
-        internal ConcreteType(string name)
+        public ConcreteType(string name)
         {
             Name = name;
         }

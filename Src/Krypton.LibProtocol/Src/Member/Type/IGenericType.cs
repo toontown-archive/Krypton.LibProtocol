@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Krypton.LibProtocol.Member.Type.Layer
+namespace Krypton.LibProtocol.Member.Type
 {
     public interface IGenericType
     {

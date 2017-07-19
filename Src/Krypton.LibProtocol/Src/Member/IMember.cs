@@ -1,4 +1,4 @@
-﻿namespace Krypton.LibProtocol.Member.Layer
+﻿namespace Krypton.LibProtocol.Member
 {
     public interface IMember
     {

@@ -1,7 +1,5 @@
 ﻿using Krypton.LibProtocol.Extensions;
-using Krypton.LibProtocol.Member.Statement.Layer;
 using Krypton.LibProtocol.Member.Type;
-using Krypton.LibProtocol.Member.Type.Layer;
 using Krypton.LibProtocol.Parser;
 
 namespace Krypton.LibProtocol.Member.Statement

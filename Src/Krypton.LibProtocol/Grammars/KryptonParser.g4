@@ -29,7 +29,7 @@ packet_definition
     ;
 
 packet_parent 
-    : namespace_reference '::' IDENTIFIER (',' packet_parent)?
+    : (namespace_reference '::')? IDENTIFIER (',' packet_parent)?
     ;
 
 namespace_definition 
@@ -46,31 +46,17 @@ namespace_member
 
 // Types
 
+type_name
+    : IDENTIFIER
+    | BUILTIN_TYPE
+    ;
+
 type_reference 
-    : builtin_type_reference
-    | declared_type_reference
-    | local_type_reference
-    | generic_attribute_reference
-    ;
-
-builtin_type_reference
-    : BUILTIN_TYPE generic_types?
-    ;
-
-declared_type_reference
-    : namespace_reference '::' IDENTIFIER generic_types?
-    ;
-    
-local_type_reference
-    : THIS '::' IDENTIFIER generic_types?
+    : (namespace_reference '::')? type_name generic_types?
     ;
     
 generic_types
     : '<' type_reference (',' type_reference)* '>'
-    ;
-
-generic_attribute_reference
-    : IDENTIFIER
     ;
 
 // Type declaration
@@ -123,7 +109,9 @@ option_value
 
 namespace_reference 
     : IDENTIFIER ('::' IDENTIFIER)* 
+    | THIS ('::' IDENTIFIER)*
     ;
 
-directory : IDENTIFIER ('/' IDENTIFIER)* '/'
-          ;
+directory 
+    : IDENTIFIER ('/' IDENTIFIER)* '/'
+    ;

@@ -1,4 +1,4 @@
-﻿namespace Krypton.LibProtocol.Member.Statement.Layer
+﻿namespace Krypton.LibProtocol.Member.Statement
 {
     public interface IStatement
     {

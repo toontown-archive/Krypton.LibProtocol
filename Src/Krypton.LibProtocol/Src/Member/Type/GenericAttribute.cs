@@ -1,6 +1,4 @@
-﻿using Krypton.LibProtocol.Member.Type.Layer;
-
-namespace Krypton.LibProtocol.Member.Type
+﻿namespace Krypton.LibProtocol.Member.Type
 {
     /// <summary>
     /// A GenericAttribute is a parameterized type 

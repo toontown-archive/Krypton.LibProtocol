@@ -10,8 +10,12 @@ namespace Krypton.LibProtocol.TestConsole
         {
             var resolver = new ContextualFileResolver();
             resolver.Include("Resources/");
-            
-            var pf = new DefinitionFile(resolver);
+
+            // Create a new definition file with a file resolver pointing to Resources/
+            var pf = new DefinitionFile
+            {
+                Resolver = resolver
+            };
             pf.Load("library_testing.kpdl");
             
             var settings = new CSharpTargetSettings

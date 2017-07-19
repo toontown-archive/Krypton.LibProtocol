@@ -1,7 +1,4 @@
-﻿using Krypton.LibProtocol.Member.Layer;
-using Krypton.LibProtocol.Member.Type.Layer;
-
-namespace Krypton.LibProtocol.Member.Type
+﻿namespace Krypton.LibProtocol.Member.Type
 {
     public class FormalTypeReference
     {

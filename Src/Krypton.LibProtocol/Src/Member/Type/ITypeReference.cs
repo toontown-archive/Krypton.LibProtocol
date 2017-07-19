@@ -1,6 +1,4 @@
-﻿using Krypton.LibProtocol.Member.Layer;
-
-namespace Krypton.LibProtocol.Member.Type.Layer
+﻿namespace Krypton.LibProtocol.Member.Type
 {
     public interface ITypeReference
     {

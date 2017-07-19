@@ -1,15 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Krypton.LibProtocol.File;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Common;
+using Krypton.LibProtocol.Member.Declared;
 using Krypton.LibProtocol.Member.Declared.Type;
-using Krypton.LibProtocol.Member.Layer;
-using Krypton.LibProtocol.Member.Statement.Layer;
+using Krypton.LibProtocol.Member.Statement;
 
 namespace Krypton.LibProtocol.Parser
 {
     public class KryptonParserListener : KryptonParserBaseListener
     {
+        private const string _nsDelimiter = "::";
         private readonly DefinitionFile _file;
         private readonly Stack<ICustomizable> _customizables;
         private readonly Stack<IMemberContainer> _memberContainers;
@@ -21,22 +24,9 @@ namespace Krypton.LibProtocol.Parser
             _customizables = new Stack<ICustomizable>();
             _memberContainers = new Stack<IMemberContainer>();
             _statementContainers = new Stack<IStatementContainer>();
-        }
-
-        /// <summary>
-        /// Builds the root container.
-        /// The root container contains every definition and declaration inside the kpdl.
-        /// </summary>
-        /// <param name="name"></param>
-        internal void BuildRootContainer(string name)
-        {
-            var ns = new Namespace
-            {
-                Name = name
-            };
             
-            _customizables.Push(ns);
-            _memberContainers.Push(ns);
+            // the definition file is our root member container
+            _memberContainers.Push(_file);
         }
 
         /// <summary>
@@ -64,11 +54,9 @@ namespace Krypton.LibProtocol.Parser
         public override void EnterNamespace_definition(KryptonParser.Namespace_definitionContext context)
         {
             var parent = _memberContainers.Peek();
-            var ns = new Namespace
-            {
-                Name = context.IDENTIFIER().GetText(), 
-                Parent = parent
-            };
+            var name = context.IDENTIFIER().GetText();
+            
+            var ns = new Namespace(name, parent);
             parent.AddMember(ns);
             
             _memberContainers.Push(ns);
@@ -94,11 +82,9 @@ namespace Krypton.LibProtocol.Parser
         public override void EnterGroup_definition(KryptonParser.Group_definitionContext context)
         {
             var parent = _memberContainers.Peek();
-            var group = new Group
-            {
-                Name = context.IDENTIFIER().GetText(),
-                Parent = parent
-            };
+            var name = context.IDENTIFIER().GetText();
+
+            var group = _file.GroupFactory.Create(name, parent);
             parent.AddMember(group);
             
             base.EnterGroup_definition(context);
@@ -114,23 +100,23 @@ namespace Krypton.LibProtocol.Parser
         {
             var parent = _memberContainers.Peek();
 
-            DeclaredTypeBase declared;
+            TypeDeclarationBase declared;
             var name = context.IDENTIFIER().GetText();
             
             // Declare a generic if we have attributes
             var generics = context.generic_type_attributes()?.IDENTIFIER();
             if (generics != null)
             {
-                var generic = new DeclaredGenericType(name, parent);
+                var generic = new GenericTypeDeclaration(name, parent);
                 foreach (var g in generics)
                 {
-                    generic.Generics.Add(g.GetText());
+                    generic.AddGeneric(g.GetText());
                 }
                 declared = generic;
             }
             else
             {
-                declared = new DeclaredType(name, parent);
+                declared = new TypeDeclaration(name, parent);
             }
 
             parent.AddMember(declared);
@@ -144,6 +130,71 @@ namespace Krypton.LibProtocol.Parser
         public override void ExitType_declaration(KryptonParser.Type_declarationContext context)
         {
             _statementContainers.Pop();
+        }
+
+        /// <summary>
+        /// Packet definition entry.
+        /// 
+        /// PACKET IDENTIFIER (':' packet_parent)? '{' operation_statement+ '}'
+        /// </summary>
+        /// <param name="context"></param>
+        public override void EnterPacket_definition(KryptonParser.Packet_definitionContext context)
+        {
+            var parent = _memberContainers.Peek();
+            var name = context.IDENTIFIER().GetText();
+
+            var packet = new Packet(name, parent);
+            parent.AddMember(packet);
+            
+            _memberContainers.Push(packet);
+            _statementContainers.Push(packet);
+            _customizables.Push(packet);
+        }
+
+        /// <summary>
+        /// Packet definition departure.
+        /// </summary>
+        /// <param name="context"></param>
+        public override void ExitPacket_definition(KryptonParser.Packet_definitionContext context)
+        {
+            _memberContainers.Pop();
+            _statementContainers.Pop();
+            _customizables.Pop();
+        }
+
+        /// <summary>
+        /// Packet parent handling.
+        /// 
+        /// (namespace_reference '::')? IDENTIFIER (',' packet_parent)?
+        /// </summary>
+        /// <param name="context"></param>
+        public override void EnterPacket_parent(KryptonParser.Packet_parentContext context)
+        {
+            var ns = context.namespace_reference()?.GetText() ?? "";
+            var path = ns.Split(new[] {_nsDelimiter}, StringSplitOptions.RemoveEmptyEntries);
+            var name = context.IDENTIFIER().GetText();
+
+            // active context is our parent's parent
+            // we pop and push to access the container the packet was defined in
+            var parent = _memberContainers.Pop();
+            var activeContext = _memberContainers.Peek();
+            _memberContainers.Push(parent);
+            
+            // Resolve the member reference
+            IMember member;
+            if (!TryResolveMember(path, name, activeContext, out member))
+            {
+                throw new KryptonParserException($"No such packet reference {ns} {name}");
+            }
+            
+            // Check if the member is a packet and wasn't defined inside our protocol
+            if (!(member is Packet) || parent.Members.Contains(member))
+            {
+                throw new KryptonParserException($"Unable to inherit type {ns} {name}");
+            }
+
+            // Add the member
+            parent.AddMember(member);
         }
 
         /// <summary>
@@ -182,8 +233,8 @@ namespace Krypton.LibProtocol.Parser
         {
             var parent = _memberContainers.Peek();
             var name = context.IDENTIFIER().GetText();
-            
-            var message = new Message(name, parent);
+
+            var message = _file.MessageFactory.Create(name, parent);
             parent.AddMember(message);
         }
 
@@ -201,6 +252,18 @@ namespace Krypton.LibProtocol.Parser
             value = value.Substring(1, value.Length - 2);
             
             OptionUtil.ApplyOption(customizable, key, value);
+        }
+
+        private bool TryResolveMember(IList<string> path, string name, IMemberContainer activeContext, out IMember member)
+        {
+            // Try to resolve the member from the active context.
+            if (activeContext.TryFindMember(path, name, out member))
+            {
+                return true;
+            }
+            
+            // Try to resolve the member from the file's context.
+            return _file.TryFindMember(path, name, out member);
         }
     }
 }
