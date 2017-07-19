@@ -32,7 +32,7 @@ namespace Krypton.LibProtocol.File
         }
         
         /// <summary> 
-        /// Loads in .kpdl file context
+        /// Loads in .kpdl file
         /// </summary> 
         /// <param name="filepath">Path to the kpdl file</param> 
         public void Load(string filepath) 
@@ -46,7 +46,9 @@ namespace Krypton.LibProtocol.File
                 var parser = new KryptonParser(tokens);
 
                 var walker = new KryptonParseTreeWalker(filepath);
-                var listener = new KryptonParserListener(this);
+
+                var listener = KryptonParserListenerFactory
+                    .Instance.Create(this, filepath);
                 
                 try
                 {

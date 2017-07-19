@@ -1,21 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using Krypton.LibProtocol.Member.Common;
-using Krypton.LibProtocol.Member.Declared;
-using Krypton.LibProtocol.Member.Declared.Type;
 using Krypton.LibProtocol.Member.Layer;
-using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Library : IMember, IMemberContainer, ICustomizable
+    public class Namespace : IMember, IMemberContainer, ICustomizable
     {
         /// <summary>
         /// The namespace containing the Libraries' packets and types
         /// </summary>
         [Option("namespace")]
-        public string Namespace { get; internal set; }
+        public string TargetNamespace { get; internal set; }
 
         /// <summary>
         /// The alias used to reference the Library inside the KPDL
@@ -28,12 +24,11 @@ namespace Krypton.LibProtocol.Member
         public IMemberContainer Parent { get; internal set; }
 
         public IEnumerable<IMember> Members { get; }
-        private readonly IList<IMember> _members;
+        private readonly IList<IMember> _members = new List<IMember>();
 
-        internal Library(string name)
+        internal Namespace(string name)
         {
             Name = name;
-            _members = new List<IMember>();
             Members = new ReadOnlyCollection<IMember>(_members);
         }
 

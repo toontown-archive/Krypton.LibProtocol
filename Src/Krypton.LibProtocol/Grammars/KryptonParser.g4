@@ -5,32 +5,43 @@ options
 
 // Root members
 
-init : imports+=import_statement* groups+=group_definition* libraries+=library_definition* protocols+=protocol_definition*
+init : import_statement* namespace_definition*
      ;
 
-import_statement : IMPORT (path=directory)? file=IDENTIFIER '.' KPDL ';'
-                 ;
+import_statement
+    : IMPORT (directory)? IDENTIFIER '.' KPDL ';'
+    ;
 
-group_definition : GROUP name=IDENTIFIER ';' ;
+group_definition 
+    : GROUP IDENTIFIER ';' 
+    ;
 
-protocol_definition : PROTOCOL 
-                      ns=namespace '[' name=IDENTIFIER ']'
-                      '{' message_definitions? packet_definition* '}' ;
+protocol_definition 
+    : PROTOCOL IDENTIFIER '{' message_definitions? packet_definition* '}' 
+    ;
 
-message_definitions : name=IDENTIFIER (',' message_definitions)?
-                    ;
+message_definitions 
+    : IDENTIFIER (',' message_definitions)?
+    ;
 
-packet_definition : PACKET name=IDENTIFIER (':' packet_parent)? 
-                    '{' operation_statement+ '}' ;
+packet_definition 
+    : PACKET IDENTIFIER (':' packet_parent)? '{' operation_statement+ '}' 
+    ;
 
-packet_parent : ns=namespace '[' name=IDENTIFIER ']' (',' packet_parent)?
-              ;
+packet_parent 
+    : namespace_reference '::' IDENTIFIER (',' packet_parent)?
+    ;
 
-library_definition : LIBRARY name=IDENTIFIER '{' member_options? library_statement* '}' ;
+namespace_definition 
+    : NAMESPACE IDENTIFIER '{' member_options? namespace_member* '}' 
+    ;
 
-library_statement
-    : packet_definition
+namespace_member 
+    : group_definition
+    | namespace_definition
+    | protocol_definition
     | type_declaration
+    | packet_definition
     ;
 
 // Types
@@ -47,7 +58,7 @@ builtin_type_reference
     ;
 
 declared_type_reference
-    : declared_namespace '::' IDENTIFIER generic_types?
+    : namespace_reference '::' IDENTIFIER generic_types?
     ;
     
 local_type_reference
@@ -60,10 +71,6 @@ generic_types
 
 generic_attribute_reference
     : IDENTIFIER
-    ;
-
-declared_namespace
-    : IDENTIFIER ('::' IDENTIFIER)*
     ;
 
 // Type declaration
@@ -114,8 +121,9 @@ option_value
 
 // Utility
 
-namespace : IDENTIFIER ('.' IDENTIFIER)* 
-          ;
+namespace_reference 
+    : IDENTIFIER ('::' IDENTIFIER)* 
+    ;
 
 directory : IDENTIFIER ('/' IDENTIFIER)* '/'
           ;

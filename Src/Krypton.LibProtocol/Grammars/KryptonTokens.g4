@@ -2,7 +2,7 @@ lexer grammar KryptonTokens;
 
 IMPORT : 'import' ;
 GROUP : 'group' ;
-LIBRARY : 'library' ;
+NAMESPACE : 'namespace' ;
 PROTOCOL : 'protocol' ;
 PACKET : 'packet' ;
 DECLARE : 'declare' ;

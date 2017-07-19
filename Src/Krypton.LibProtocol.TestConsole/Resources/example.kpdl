@@ -1,38 +1,47 @@
-group ClusterMember;
+namespace krypton {
+    group ClusterMember;
 
-library krypton {
     declare client_info<some_generic> {
         string ipv4;
         uint16 port;
         some_generic generic_member;
     }
- 
+    
     declare cluster_info<some_generic> {
         array<this::client_info<some_generic>> clients;
         uint32 uptime;
     }
-}
-
-library Flow {
-    packet PacketHeader {
-        uint16 context;
+    
+    namespace management {
+        packet Kill {
+            bool silent;
+            (false) => {
+                string reason;
+            };
+        }
     }
-}
-
-protocol Krypton.Node[Management] {
-    Kill,
-    Hello,
-    HelloResponse
-
-    packet Kill {
-        bool silent;
-        (silent == false) => {
-            string reason;
-        };
+    
+    namespace flow {
+        packet PacketHeader {
+            uint16 context;
+        }
     }
-
-    packet Hello : Flow[PacketHeader] {
-        uint32 infrastructre_hash;
-        uint32 protocol_hash;
+    
+    protocol Management {
+        Kill,
+        Hello,
+        HelloResponse
+    
+        packet Kill {
+            bool silent;
+            (false) => {
+                string reason;
+            };
+        }
+    
+        packet Hello : flow::PacketHeader {
+            uint32 infrastructre_hash;
+            uint32 protocol_hash;
+        }
     }
 }
