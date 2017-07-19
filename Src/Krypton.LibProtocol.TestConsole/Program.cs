@@ -16,7 +16,8 @@ namespace Krypton.LibProtocol.TestConsole
             {
                 Resolver = resolver
             };
-            pf.Load("library_testing.kpdl");
+            pf.PopulateBuiltins();
+            pf.Load("example.kpdl");
             
             var settings = new CSharpTargetSettings
             {

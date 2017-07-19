@@ -21,13 +21,14 @@ namespace Krypton.LibProtocol.File.Util
             _directories.Add(path);
         }
 
-        public string Resolve(string path)
+        public bool TryResolve(string path, out string result)
         {
-            var result = from directory in _directories 
+            var results = from directory in _directories 
                 select Directory.EnumerateFiles(directory, path) into x 
                 where x.Any() select x.First();
-           
-            return result.FirstOrDefault();
+            result = results.FirstOrDefault();
+
+            return result != null;
         }
     }
 }

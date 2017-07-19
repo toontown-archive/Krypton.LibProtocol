@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Antlr4.Runtime;
+using Krypton.LibProtocol.File.Util;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Type;
 using Krypton.LibProtocol.Parser;
@@ -14,30 +15,41 @@ namespace Krypton.LibProtocol.File
 
         public DefinitionFile() : base(null)
         {
+            Resolver = new ContextualFileResolver();
         }
         
         /// <summary> 
         /// Loads in .kpdl file
         /// </summary> 
-        /// <param name="filepath">Path to the kpdl file</param> 
-        public void Load(string filepath) 
-        { 
-            filepath = Resolver?.Resolve(filepath) ?? filepath; 
-            using (var fs = new FileStream(filepath, FileMode.Open)) 
+        /// <param name="file">Path to the kpdl file</param> 
+        public void Load(string file)
+        {
+            string path;
+            if (!Resolver.TryResolve(file, out path))
+            {
+                throw new FileNotFoundException($"Unable to locate file {file}");
+            }
+            
+            using (var fs = new FileStream(path, FileMode.Open)) 
             { 
-                Load(filepath, fs);
+                Load(path, fs);
             }
         }
 
         /// <summary>
         /// Loads in a .kpdl file using a resolver from outside the instance
         /// </summary>
-        /// <param name="filepath"></param>
+        /// <param name="path"></param>
         /// <param name="resolver"></param>
-        public void Load(string filepath, IFileResolver resolver)
+        public void Load(string file, IFileResolver resolver)
         {
-            filepath = resolver.Resolve(filepath); 
-            Load(filepath);
+            string path;
+            if (!resolver.TryResolve(file, out path))
+            {
+                throw new FileNotFoundException($"Unable to locate file {file}");
+            }
+            
+            Load(path);
         }
 
         /// <summary>

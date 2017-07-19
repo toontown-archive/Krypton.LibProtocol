@@ -7,16 +7,20 @@ using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Declared;
 using Krypton.LibProtocol.Member.Declared.Type;
 using Krypton.LibProtocol.Member.Statement;
+using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Parser
 {
     public class KryptonParserListener : KryptonParserBaseListener
     {
         private const string _nsDelimiter = "::";
+        private const string _thisKeyword = "this";
         private readonly DefinitionFile _file;
         private readonly Stack<ICustomizable> _customizables;
         private readonly Stack<IMemberContainer> _memberContainers;
         private readonly Stack<IStatementContainer> _statementContainers;
+        private readonly Stack<ITypeReferenceContainer> _typeReferenceContainers;
+        private readonly Stack<IMemberContainer> _contextStack;
         
         public KryptonParserListener(DefinitionFile file)
         {
@@ -24,9 +28,12 @@ namespace Krypton.LibProtocol.Parser
             _customizables = new Stack<ICustomizable>();
             _memberContainers = new Stack<IMemberContainer>();
             _statementContainers = new Stack<IStatementContainer>();
+            _typeReferenceContainers = new Stack<ITypeReferenceContainer>();
+            _contextStack = new Stack<IMemberContainer>();
             
-            // the definition file is our root member container
+            // the definition file is our root container and context
             _memberContainers.Push(_file);
+            _contextStack.Push(_file);
         }
 
         /// <summary>
@@ -60,6 +67,7 @@ namespace Krypton.LibProtocol.Parser
             parent.AddMember(ns);
             
             _memberContainers.Push(ns);
+            _contextStack.Push(ns);
             _customizables.Push(ns);
         }
 
@@ -69,8 +77,9 @@ namespace Krypton.LibProtocol.Parser
         /// <param name="context"></param>
         public override void ExitNamespace_definition(KryptonParser.Namespace_definitionContext context)
         {
-            _memberContainers.Peek();
-            _customizables.Peek();
+            _memberContainers.Pop();
+            _contextStack.Pop();
+            _customizables.Pop();
         }
 
         /// <summary>
@@ -174,11 +183,8 @@ namespace Krypton.LibProtocol.Parser
             var path = ns.Split(new[] {_nsDelimiter}, StringSplitOptions.RemoveEmptyEntries);
             var name = context.IDENTIFIER().GetText();
 
-            // active context is our parent's parent
-            // we pop and push to access the container the packet was defined in
-            var parent = _memberContainers.Pop();
-            var activeContext = _memberContainers.Peek();
-            _memberContainers.Push(parent);
+            var parent = _memberContainers.Peek();
+            var activeContext = _contextStack.Peek();
             
             // Resolve the member reference
             IMember member;
@@ -236,6 +242,119 @@ namespace Krypton.LibProtocol.Parser
 
             var message = _file.MessageFactory.Create(name, parent);
             parent.AddMember(message);
+        }
+
+        /// <summary>
+        /// Type reference entry.
+        /// 
+        /// (namespace_reference '::')? type_name generic_types?
+        /// </summary>
+        /// <param name="context"></param>
+        public override void EnterType_reference(KryptonParser.Type_referenceContext context)
+        {
+            // pass if we are a generic attribute reference.
+            var attribute = context.generic_attribute_reference();
+            if (attribute != null)
+            {
+                return;
+            }
+
+            var parent = _typeReferenceContainers.Peek();
+
+            var name = context.type_name().GetText();
+            var ns = context.namespace_reference()?.GetText() ?? "";
+            
+            // if "this" is the namespace we are referencing the local context
+            // setting the namespace to nothing will make us look through the active context first
+            if (ns == _thisKeyword)
+            {
+                ns = ""; 
+            }
+
+            var path = ns.Split(new[] {_nsDelimiter}, StringSplitOptions.RemoveEmptyEntries);
+            var activeContext = _contextStack.Peek();
+            
+            // Resolve the member reference
+            IMember member;
+            if (!TryResolveMember(path, name, activeContext, out member))
+            {
+                throw new KryptonParserException($"Unable to resolve type {ns} {name}");
+            }
+
+            IType type;
+            
+            // If we are a generic type...
+            var generic = context.generic_types() != null;
+            if (generic)
+            {
+                type = new GenericType(name);
+                _typeReferenceContainers.Push((ITypeReferenceContainer) type);
+            }
+            else
+            {
+                type = new ConcreteType(name);
+            }
+
+            // Create a type reference and add it to our parent.
+            var reference = new FormalTypeReference(type, member.Parent);
+            parent.AddTypeReference(reference);
+        }
+
+        /// <summary>
+        /// Type reference departure.
+        /// </summary>
+        /// <param name="context"></param>
+        public override void ExitType_reference(KryptonParser.Type_referenceContext context)
+        {
+            // Remove ourselves from the stack if we are a generic
+            var generic = context.generic_types() != null;
+            if (generic)
+            {
+                _typeReferenceContainers.Pop();
+            }
+        }
+
+        /// <summary>
+        /// Generic attribute reference handling.
+        /// 
+        /// IDENTIFIER
+        /// </summary>
+        /// <param name="context"></param>
+        public override void EnterGeneric_attribute_reference(KryptonParser.Generic_attribute_referenceContext context)
+        {
+            var parent = _typeReferenceContainers.Peek();
+            var name = context.IDENTIFIER().GetText();
+            
+            var type = new GenericAttribute(name);
+            var reference = new FormalTypeReference(type, null);
+            
+            parent.AddTypeReference(reference);
+        }
+
+        /// <summary>
+        /// Data statement entry.
+        /// 
+        /// type_reference IDENTIFIER ';'
+        /// </summary>
+        /// <param name="context"></param>
+        public override void EnterData_statement(KryptonParser.Data_statementContext context)
+        {
+            var parent = _statementContainers.Peek();
+            var name = context.IDENTIFIER().GetText();
+            var statement = new TypeStatement(name, parent);
+            
+            // Add ourselves to our parent and push us onto the ref container stack
+            parent.AddStatement(statement);
+            _typeReferenceContainers.Push(statement);
+        }
+
+        /// <summary>
+        /// Data statement departure.
+        /// </summary>
+        /// <param name="context"></param>
+        public override void ExitData_statement(KryptonParser.Data_statementContext context)
+        {
+            _typeReferenceContainers.Pop();
         }
 
         /// <summary>

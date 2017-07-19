@@ -2,6 +2,6 @@
 {
     public interface IFileResolver
     {
-        string Resolve(string path);
+        bool TryResolve(string path, out string result);
     }
 }

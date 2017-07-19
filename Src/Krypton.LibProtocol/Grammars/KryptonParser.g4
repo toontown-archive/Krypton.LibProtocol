@@ -52,7 +52,12 @@ type_name
     ;
 
 type_reference 
-    : (namespace_reference '::')? type_name generic_types?
+    : generic_attribute_reference
+    | (namespace_reference '::')? type_name generic_types?
+    ;
+    
+generic_attribute_reference
+    : IDENTIFIER
     ;
     
 generic_types

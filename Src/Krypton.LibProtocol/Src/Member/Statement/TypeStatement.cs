@@ -20,9 +20,10 @@ namespace Krypton.LibProtocol.Member.Statement
         
         public ITypeReference Type { get; private set; }
 
-        internal TypeStatement(string name)
+        internal TypeStatement(string name, IStatementContainer parent)
         {
             Name = name;
+            Parent = parent;
         }
         
         public void AddTypeReference(ITypeReference type)
