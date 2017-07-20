@@ -5,7 +5,7 @@ options
 
 // Root members
 
-init : import_statement* namespace_definition*
+init : import_statement* library_declaration*
      ;
 
 import_statement
@@ -32,13 +32,13 @@ packet_parent
     : (namespace_reference '::')? IDENTIFIER (',' packet_parent)?
     ;
 
-namespace_definition 
-    : NAMESPACE IDENTIFIER '{' member_options? namespace_member* '}' 
+library_declaration 
+    : LIBRARY IDENTIFIER '{' member_options? library_member* '}' 
     ;
 
-namespace_member 
+library_member 
     : group_definition
-    | namespace_definition
+    | library_declaration
     | protocol_definition
     | type_declaration
     | packet_definition

@@ -53,30 +53,32 @@ namespace Krypton.LibProtocol.Parser
         }
 
         /// <summary>
-        /// Namespace declaration entry.
+        /// Library declaration entry.
         /// 
-        /// NAMESPACE IDENTIFIER '{' member_options? namespace_member* '}' 
+        /// LIBRARY IDENTIFIER '{' member_options? namespace_member* '}' 
         /// </summary>
         /// <param name="context"></param>
-        public override void EnterNamespace_definition(KryptonParser.Namespace_definitionContext context)
+        public override void EnterLibrary_declaration(KryptonParser.Library_declarationContext context)
         {
             var parent = _memberContainers.Peek();
             var name = context.IDENTIFIER().GetText();
             
-            var ns = new Namespace(name, parent);
-            parent.AddMember(ns);
+            var lib = new Library(name, parent);
+            parent.AddMember(lib);
             
-            _memberContainers.Push(ns);
-            _contextStack.Push(ns);
-            _customizables.Push(ns);
+            _memberContainers.Push(lib);
+            _contextStack.Push(lib);
+            _customizables.Push(lib);
         }
 
+
         /// <summary>
-        /// Namespace declaration departure.
+        /// Library declaration departure.
         /// </summary>
         /// <param name="context"></param>
-        public override void ExitNamespace_definition(KryptonParser.Namespace_definitionContext context)
+        public override void ExitLibrary_declaration(KryptonParser.Library_declarationContext context)
         {
+            Console.Out.WriteLine(_contextStack.Count); //dbg
             _memberContainers.Pop();
             _contextStack.Pop();
             _customizables.Pop();

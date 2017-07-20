@@ -7,13 +7,13 @@ target_members(container) ::= <<
 >>
 
 /**
-    NAMESPACE DECLARATION
+    LIBRARY DECLARATION
 */
 
-namespace_template(namespace) ::= <<
-namespace <namespace.Name>
+library_template(library) ::= <<
+namespace <library.Name>
 {
-    <target_members(namespace)>
+    <target_members(library)>
 }
 >>
 

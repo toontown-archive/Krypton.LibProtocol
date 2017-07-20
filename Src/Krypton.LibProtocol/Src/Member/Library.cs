@@ -3,9 +3,9 @@ using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Namespace : NestedMemberContainer, IMember, ICustomizable, ITemplateType
+    public class Library : NestedMemberContainer, IMember, ICustomizable, ITemplateType
     {
-        public string TemplateName => "namespace";
+        public string TemplateName => "library";
         
         /// <summary>
         /// The target output namespace
@@ -14,11 +14,11 @@ namespace Krypton.LibProtocol.Member
         public string TargetNamespace { get; internal set; }
 
         /// <summary>
-        /// The alias used to reference the Namespace inside the KPDL
+        /// The alias used to reference the library inside the KPDL
         /// </summary>
         public string Name { get; }
         
-        internal Namespace(string name, IMemberContainer parent) : base(parent)
+        internal Library(string name, IMemberContainer parent) : base(parent)
         {
             Name = name;
         }

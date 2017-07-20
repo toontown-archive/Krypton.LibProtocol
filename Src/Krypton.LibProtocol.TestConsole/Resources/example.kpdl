@@ -1,4 +1,4 @@
-namespace krypton {
+library krypton {
     group ClusterMember;
 
     declare client_info<some_generic> {
@@ -12,7 +12,7 @@ namespace krypton {
         uint32 uptime;
     }
     
-    namespace management {
+    library management {
         packet Kill {
             bool silent;
             (false) => {
@@ -21,7 +21,7 @@ namespace krypton {
         }
     }
     
-    namespace flow {
+    library flow {
         packet PacketHeader {
             uint16 context;
         }
