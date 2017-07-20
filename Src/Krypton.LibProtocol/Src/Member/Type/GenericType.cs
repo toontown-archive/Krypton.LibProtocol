@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Krypton.LibProtocol.Parser;
+using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member.Type
 {
-    public class GenericType : IType, IGenericType, ITypeReferenceContainer
+    public class GenericType : IType, IGenericType, ITypeReferenceContainer, ITemplateType
     {
+        public string TemplateName => "generic_type";
+        
         public string Name { get; }
         public IEnumerable<ITypeReference> Generics { get; }
         

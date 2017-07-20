@@ -2,11 +2,14 @@
 using System.Collections.ObjectModel;
 using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Statement;
+using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member.Declared
 {
-    public class Packet : NestedMemberContainer, IMember, IStatementContainer, ICustomizable
+    public class Packet : NestedMemberContainer, IMember, IStatementContainer, ICustomizable, ITemplateType
     {
+        public string TemplateName => "packet";
+        
         public string Name { get; }
 
         public IEnumerable<IStatement> Statements { get; }

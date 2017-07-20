@@ -1,9 +1,12 @@
 ﻿using Krypton.LibProtocol.Extensions;
+using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member.Type
 {
-    public class ConcreteType : IType
+    public class ConcreteType : IType, ITemplateType
     {
+        public string TemplateName => "concrete_type";
+        
         /// <summary>
         /// The name of the Type
         /// </summary>

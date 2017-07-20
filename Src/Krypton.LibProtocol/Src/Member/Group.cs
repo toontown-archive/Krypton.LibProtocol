@@ -1,6 +1,8 @@
-﻿namespace Krypton.LibProtocol.Member
+﻿using Krypton.LibProtocol.Target;
+
+namespace Krypton.LibProtocol.Member
 {
-    public class Group : IMember
+    public class Group : IMember, ITemplateType
     {
         public int Id { get; }
         
@@ -13,5 +15,7 @@
             Id = id;
             Parent = parent;
         }
+
+        public string TemplateName => "group";
     }
 }

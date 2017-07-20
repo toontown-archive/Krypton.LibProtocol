@@ -1,9 +1,12 @@
 ﻿using Krypton.LibProtocol.Member.Common;
+using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Namespace : NestedMemberContainer, IMember, ICustomizable
+    public class Namespace : NestedMemberContainer, IMember, ICustomizable, ITemplateType
     {
+        public string TemplateName => "namespace";
+        
         /// <summary>
         /// The target output namespace
         /// </summary>

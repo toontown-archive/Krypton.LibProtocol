@@ -1,7 +1,14 @@
-﻿namespace Krypton.LibProtocol.Member
+﻿using Krypton.LibProtocol.Target;
+
+namespace Krypton.LibProtocol.Member
 {
-    public class Protocol : NestedMemberContainer, IMember
+    public class Protocol : NestedMemberContainer, IMember, ITemplateType
     {        
+        public string TemplateName => "protocol";
+        
+        /// <summary>
+        /// The name of the protocol
+        /// </summary>
         public string Name { get; }
 
         public Protocol(string name, IMemberContainer parent) : base(parent)
@@ -10,8 +17,10 @@
         }
     }
     
-    public class Message : IMember
+    public class Message : IMember, ITemplateType
     {
+        public string TemplateName => "message";
+        
         public int Id { get; }
         public string Name { get; }
         public IMemberContainer Parent { get; }

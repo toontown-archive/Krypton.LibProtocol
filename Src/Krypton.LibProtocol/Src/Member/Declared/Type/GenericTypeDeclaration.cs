@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member.Declared.Type
 {
-    public class GenericTypeDeclaration : TypeDeclarationBase
+    public class GenericTypeDeclaration : TypeDeclarationBase, ITemplateType
     {
+        public string TemplateName => "generic_typedecl";
+        
         public IEnumerable<string> Generics { get; }
         private readonly IList<string> _generics = new List<string>();
 

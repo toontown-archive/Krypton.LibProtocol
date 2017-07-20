@@ -1,15 +1,70 @@
-type_declaration(typedef) ::= <<
-
+init(root) ::= <<
+<([root.TemplateName, "_template"])(root)>
 >>
 
-library_declaration(library) ::= <<
-using Krypton.LibProtocol.Type;
+target_members(container) ::= <<
+<container.Members: {m | <([m.TemplateName, "_template"])(m)>}; separator="\n">
+>>
 
-namespace <library.Namespace> {
+/**
+    NAMESPACE DECLARATION
+*/
 
-    <library.Types:type_declaration(); separator="\n\n">
+namespace_template(namespace) ::= <<
+namespace <namespace.Name>
+{
+    <target_members(namespace)>
 }
 >>
+
+// groups
+group_template(gobj) ::= <<
+<gobj.Name>
+>>
+
+/**
+    PROTOCOL DECLARATION
+*/
+protocol_template(protocol) ::= <<
+public class <protocol.Name>
+{
+    <target_members(protocol)>
+}
+>>
+
+// messages
+message_template(message) ::= <<
+>>
+
+/**
+    PACKET DECLARATION
+*/
+packet_template(packet) ::= <<
+public class <packet.Name> <packet_parent_builder(packet)>
+{
+}
+>>
+
+// Parent builder
+packet_parent_builder(packet) ::= <<
+<packet.Members: {m | <m.Name>}; separator=",">
+>>
+
+/**
+    TYPE DECLARATION
+*/
+
+typedecl_template(typedecl) ::= <<
+<typedecl.Name>
+>>
+
+generic_typedecl_template(typedecl) ::= <<
+<typedecl.Name>
+>>
+
+/**
+    TYPE REFERENCING
+*/
 
 // Builtin types to their perspective class names
 builtin_type ::= [

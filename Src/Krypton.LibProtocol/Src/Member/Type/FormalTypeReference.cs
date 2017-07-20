@@ -1,7 +1,11 @@
-﻿namespace Krypton.LibProtocol.Member.Type
+﻿using Krypton.LibProtocol.Target;
+
+namespace Krypton.LibProtocol.Member.Type
 {
-    public class FormalTypeReference : ITypeReference
+    public class FormalTypeReference : ITypeReference, ITemplateType
     {
+        public string TemplateName => "formal_typeref";
+        
         /// <summary>
         /// Type definition
         /// </summary>

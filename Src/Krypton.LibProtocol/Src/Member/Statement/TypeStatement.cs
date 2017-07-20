@@ -1,11 +1,14 @@
 ﻿using Krypton.LibProtocol.Extensions;
 using Krypton.LibProtocol.Member.Type;
 using Krypton.LibProtocol.Parser;
+using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member.Statement
 {
-    public class TypeStatement : IStatement, ITypeReferenceContainer
+    public class TypeStatement : IStatement, ITypeReferenceContainer, ITemplateType
     {
+        public string TemplateName => "type_statement";
+        
         /// <summary>
         /// The name of the type reference
         /// </summary>
@@ -15,8 +18,6 @@ namespace Krypton.LibProtocol.Member.Statement
         /// The name of the type in CamelCase
         /// </summary>
         public string CamelCaseName => Name.ToCamelCase();
-        
-        public string StatementAlias => "type_statement";
         
         public ITypeReference Type { get; private set; }
 
