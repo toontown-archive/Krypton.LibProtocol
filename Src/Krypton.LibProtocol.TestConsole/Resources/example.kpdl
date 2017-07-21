@@ -1,6 +1,11 @@
 library krypton {
     group ClusterMember;
 
+    declare example_type {
+        string message;
+        uint16 reason;
+    }
+
     declare client_info<some_generic> {
         string ipv4;
         uint16 port;

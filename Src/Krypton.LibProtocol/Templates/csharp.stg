@@ -11,7 +11,7 @@ target_members(container) ::= <<
 */
 
 library_template(library) ::= <<
-namespace <library.Name>
+namespace <library.name>
 {
     <target_members(library)>
 }
@@ -26,7 +26,7 @@ group_template(gobj) ::= <<
     PROTOCOL DECLARATION
 */
 protocol_template(protocol) ::= <<
-public class <protocol.Name>
+public class <protocol.name>
 {
     <target_members(protocol)>
 }
@@ -55,31 +55,114 @@ packet_parent_builder(packet) ::= <<
 */
 
 typedecl_template(typedecl) ::= <<
-<typedecl.Name>
+public class <typedecl.name> : <as_krypton_type(typedecl.name)>
+{
+    <typedecl_body(typedecl)>
+}
 >>
 
 generic_typedecl_template(typedecl) ::= <<
-<typedecl.Name>
+public class <generic_decl_name(typedecl)> : <as_krypton_type(generic_decl_name(typedecl))>
+    <typedecl.Generics:generic_constraint(); separator="\n">
+{
+    <typedecl_body(typedecl)>
+}
+>>
+
+generic_decl_name(typedecl) ::= <<
+<typedecl.name>\<<typedecl.Generics:{g | <g.name>}; separator="\n">\>
+>>
+
+generic_constraint(generic) ::= <<
+where <generic.name>: <as_krypton_type(generic.name)>, new()
+>>
+
+typedecl_body(typedecl) ::= <<
+<typedecl.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
+
+public override void Consume(Krypton.LibProtocol.BufferReader br)
+{
+    <typedecl.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Consume(br);}; separator="\n">
+}
+
+public override void Write(Krypton.LibProtocol.BufferWriter bw)
+{
+    <typedecl.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
+}
+
+public override void Build(Krypton.LibProtocol.BufferReader br)
+{
+    <typedecl.Statements: {s | <([s.TemplateName, "_builder"])(s)>}; separator="\n">
+}
+>>
+
+/**
+    STATEMENTS
+*/
+
+type_statement_builder(statement) ::= <<
+<s.name> = <if(statement.Type.namespace)><formal_typeref(statement.Type)><else><as_krypton_type(formal_typeref(statement.Type))><endif>.Create();
+<s.name>.Build(br);
+>>
+
+if_statement_builder(statement) ::= <<
+<statement.Statements: {s | <([s.TemplateName, "_builder"])(s)>}; separator="\n">
+>>
+
+type_statement_ref(statement) ::= <<
+<statement.name>
+>>
+
+if_statement_ref(statement) ::= <<
+<statement.Statements: {s | <([s.TemplateName, "_ref"])(s)>}; separator="\n">
+>>
+
+type_statement_as_member(statement) ::= <<
+public <formal_typeref(statement.Type)> <statement.name> { get; set; }
+>>
+
+if_statement_as_member(statement) ::= <<
+<statement.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
 >>
 
 /**
     TYPE REFERENCING
 */
 
+formal_typeref(typeref) ::= <<
+<if(typeref.namespace)><typeref.namespace>.<endif><(["resolve_", typeref.Type.TemplateName])(typeref.Type)>
+>>
+
+resolve_generic_type(type) ::= <<
+<resolve_concrete_type(type)>\<<type.Generics:formal_typeref()>\>
+>>
+
+resolve_concrete_type(type) ::= <<
+<if(builtin_type.(type.Name))><builtin_type.(type.Name)><else><type.name><endif>
+>>
+
+resolve_generic_attribute(generic) ::= <<
+<generic.name>
+>>
+
+as_krypton_type(name) ::= <<
+Krypton.LibProtocol.Type.KryptonType\<<name>\>
+>>
+
 // Builtin types to their perspective class names
 builtin_type ::= [
-    "byte": "KryptonByte",
-    "bool": "KryptonBool",
-    "int8": "KryptonInt8",
-    "uint8": "KryptonUInt8",
-    "int16": "KryptonInt16",
-    "uint16": "KryptonUInt16",
-    "int32": "KryptonInt32",
-    "uint32": "KryptonUInt32",
-    "int64": "KryptonInt64",
-    "uint64": "KryptonUInt64",
-    "string": "KryptonString",
-    "cstring": "KryptonCString",
-    "buffer": "KryptonBuffer",
-    "array": "KryptonArray"
+    "byte": "ByteType",
+    "bool": "BoolType",
+    "int8": "Int8Type",
+    "uint8": "UInt8Type",
+    "int16": "Int16Type",
+    "uint16": "UInt16Type",
+    "int32": "Int32Type",
+    "uint32": "UInt32Type",
+    "int64": "Int64Type",
+    "uint64": "UInt64Type",
+    "string": "StringType",
+    "cstring": "CStringType",
+    "buffer": "BufferType",
+    "array": "ArrayType"
 ]

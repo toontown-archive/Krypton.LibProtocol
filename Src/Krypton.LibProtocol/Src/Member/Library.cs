@@ -3,7 +3,7 @@ using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Library : NestedMemberContainer, IMember, ICustomizable, ITemplateType
+    public class Library : NestedMemberContainer, IMember, ICustomizable, ITemplateType, INameable
     {
         public string TemplateName => "library";
         

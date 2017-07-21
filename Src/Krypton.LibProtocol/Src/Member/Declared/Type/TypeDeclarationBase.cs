@@ -9,17 +9,12 @@ namespace Krypton.LibProtocol.Member.Declared.Type
     /// <summary>
     /// DeclaredTypeBase is an abstract class implemented by types declared inside a Library
     /// </summary>
-    public abstract class TypeDeclarationBase : IMember, IType, IStatementContainer
+    public abstract class TypeDeclarationBase : IMember, IStatementContainer, INameable
     {   
         /// <summary>
         /// The name of the decalred type
         /// </summary>
         public string Name { get; }
-        
-        /// <summary>
-        /// The name of the declared type in CamelCase
-        /// </summary>
-        public string CamelCaseName => Name.ToCamelCase();
         
         /// <summary>
         /// The Parent of the declared type

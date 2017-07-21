@@ -6,7 +6,7 @@ using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member.Declared
 {
-    public class Packet : NestedMemberContainer, IMember, IStatementContainer, ICustomizable, ITemplateType
+    public class Packet : NestedMemberContainer, IMember, IStatementContainer, ICustomizable, ITemplateType, INameable
     {
         public string TemplateName => "packet";
         

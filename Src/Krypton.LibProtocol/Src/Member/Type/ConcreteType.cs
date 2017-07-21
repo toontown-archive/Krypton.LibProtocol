@@ -1,9 +1,8 @@
-﻿using Krypton.LibProtocol.Extensions;
-using Krypton.LibProtocol.Target;
+﻿using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member.Type
 {
-    public class ConcreteType : IType, ITemplateType
+    public class ConcreteType : IType, ITemplateType, INameable
     {
         public string TemplateName => "concrete_type";
         
@@ -11,11 +10,6 @@ namespace Krypton.LibProtocol.Member.Type
         /// The name of the Type
         /// </summary>
         public string Name { get; }
-
-        /// <summary>
-        /// The name of the Type in CamelCase
-        /// </summary>
-        public string CamelCaseName => Name.ToCamelCase();
 
         public ConcreteType(string name)
         {

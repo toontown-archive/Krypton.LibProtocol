@@ -121,7 +121,8 @@ namespace Krypton.LibProtocol.Parser
                 var generic = new GenericTypeDeclaration(name, parent);
                 foreach (var g in generics)
                 {
-                    generic.AddGeneric(g.GetText());
+                    var t = new GenericAttribute(g.GetText());
+                    generic.AddGeneric(t);
                 }
                 declared = generic;
             }

@@ -2,7 +2,7 @@
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Protocol : NestedMemberContainer, IMember, ITemplateType
+    public class Protocol : NestedMemberContainer, IMember, ITemplateType, INameable
     {        
         public string TemplateName => "protocol";
         
@@ -17,7 +17,7 @@ namespace Krypton.LibProtocol.Member
         }
     }
     
-    public class Message : IMember, ITemplateType
+    public class Message : IMember, ITemplateType, INameable
     {
         public string TemplateName => "message";
         

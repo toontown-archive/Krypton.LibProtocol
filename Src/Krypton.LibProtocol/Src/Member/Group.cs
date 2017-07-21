@@ -2,7 +2,7 @@
 
 namespace Krypton.LibProtocol.Member
 {
-    public class Group : IMember, ITemplateType
+    public class Group : IMember, ITemplateType, INameable
     {
         public int Id { get; }
         

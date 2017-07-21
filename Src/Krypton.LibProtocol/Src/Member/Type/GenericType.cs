@@ -4,7 +4,7 @@ using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member.Type
 {
-    public class GenericType : IType, IGenericType, ITypeReferenceContainer, ITemplateType
+    public class GenericType : IType, IGenericType, ITypeReferenceContainer, ITemplateType, INameable
     {
         public string TemplateName => "generic_type";
         
