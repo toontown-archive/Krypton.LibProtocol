@@ -56,5 +56,10 @@
             Value = br.Bytes;
             br.SkipBytes(Value.Length);
         }
+        
+        public override void Build(BufferReader br)
+        {
+            Consume(br);
+        }
     }
 }

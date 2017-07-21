@@ -50,9 +50,11 @@ namespace Krypton.LibProtocol.Type
         public static T Read(BufferReader br)
         {
             var inst = Create();
-            inst.Consume(br);
+            inst.Build(br);
             return inst;
         }
+
+        public abstract void Build(BufferReader br);
         
         public abstract void Write(BufferWriter bw);
 

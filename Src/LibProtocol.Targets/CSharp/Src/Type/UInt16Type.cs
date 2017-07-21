@@ -23,5 +23,10 @@
         {
             Value = br.ReadUInt16();
         }
+        
+        public override void Build(BufferReader br)
+        {
+            Consume(br);
+        }
     }
 }

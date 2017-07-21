@@ -23,5 +23,10 @@
         {
             Value = br.ReadBool();
         }
+        
+        public override void Build(BufferReader br)
+        {
+            Consume(br);
+        }
     }
 }

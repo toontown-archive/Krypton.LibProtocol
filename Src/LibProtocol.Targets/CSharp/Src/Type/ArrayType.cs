@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Krypton.LibProtocol.Type
 {
@@ -36,6 +37,11 @@ namespace Krypton.LibProtocol.Type
                 
                 Value.Add(x);
             }
+        }
+
+        public override void Build(BufferReader br)
+        {
+            Consume(br);
         }
     }
 }
