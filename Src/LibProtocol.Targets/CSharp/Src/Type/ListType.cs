@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 namespace Krypton.LibProtocol.Type
 {
-    public class ArrayType<TK> : KryptonType<ArrayType<TK>> where TK: KryptonType<TK>, new() 
+    public class ListType<TK> : KryptonType<ListType<TK>> where TK: KryptonType<TK>, new() 
     {
         public List<TK> Value { get; set; }
 
-        public static implicit operator ArrayType<TK>(List<TK> val)
+        public static implicit operator ListType<TK>(List<TK> val)
         {
-            return new ArrayType<TK> { Value = val };
+            return new ListType<TK> { Value = val };
         }
         
-        public static implicit operator List<TK>(ArrayType<TK> val)
+        public static implicit operator List<TK>(ListType<TK> val)
         {
             return val.Value;
         }

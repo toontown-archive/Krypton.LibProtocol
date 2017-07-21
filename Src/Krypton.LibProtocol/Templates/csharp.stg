@@ -164,5 +164,5 @@ builtin_type ::= [
     "string": "StringType",
     "cstring": "CStringType",
     "buffer": "BufferType",
-    "array": "ArrayType"
+    "list": "ListType"
 ]

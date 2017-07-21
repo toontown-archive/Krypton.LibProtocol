@@ -18,7 +18,7 @@ BUILTIN_TYPE
   | INT32 | UINT32
   | INT64 | UINT64
   | STRING | CSTRING
-  | ARRAY
+  | LIST
   ;
 
 fragment BYTE : 'byte' ;
@@ -34,7 +34,7 @@ fragment UINT64 : 'uint64' ;
 fragment STRING : 'string' ;
 fragment CSTRING : 'cstring' ;
 fragment BUFFER : 'buffer';
-fragment ARRAY : 'array' ;
+fragment LIST : 'list' ;
 
 TRUE : 'true' ;
 FALSE : 'false' ;
