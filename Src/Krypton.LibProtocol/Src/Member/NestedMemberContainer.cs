@@ -24,19 +24,15 @@ namespace Krypton.LibProtocol.Member
             MemberList.Add(member);
         }
 
+        public bool ContainsMember(string name)
+        {
+            return MemberList.Any(m => m.Name == name);
+        }
+
         public bool TryFindMember(string name, out IMember member)
         {
-            foreach (var m in MemberList)
-            {
-                if (m.Name != name) 
-                    continue;
-                
-                member = m;
-                return true;
-            }
-
-            member = null;
-            return false;
+            member = MemberList.FirstOrDefault(m => m.Name == name);
+            return member != null;
         }
 
         public bool TryFindMember(IList<string> path, string name, out IMember member)

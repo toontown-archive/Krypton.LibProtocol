@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.IO;
 using Antlr4.StringTemplate;
 using Krypton.LibProtocol.Extensions;
 using Krypton.LibProtocol.File;
 using Krypton.LibProtocol.Member;
-using Krypton.LibProtocol.Member.Statement;
 using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Target.CSharp

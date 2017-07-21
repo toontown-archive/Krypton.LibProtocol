@@ -34,15 +34,7 @@ library krypton {
     
     protocol Management {
         Kill,
-        Hello,
         HelloResponse
-    
-        packet Kill {
-            bool silent;
-            (false) => {
-                string reason;
-            };
-        }
     
         packet Hello : flow::PacketHeader {
             uint32 infrastructre_hash;

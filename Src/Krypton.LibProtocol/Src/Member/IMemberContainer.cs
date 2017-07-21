@@ -14,6 +14,8 @@ namespace Krypton.LibProtocol.Member
         /// </summary>
         /// <param name="member"></param>
         void AddMember(IMember member);
+
+        bool ContainsMember(string name);
         
         bool TryFindMember(IList<string> path, string name, out IMember member);
         bool TryFindMember(string name, out IMember member);

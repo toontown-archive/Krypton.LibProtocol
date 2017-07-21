@@ -1,4 +1,5 @@
-﻿using Krypton.LibProtocol.File;
+﻿using System;
+using Krypton.LibProtocol.File;
 using Krypton.LibProtocol.File.Util;
 using Krypton.LibProtocol.Target.CSharp;
 

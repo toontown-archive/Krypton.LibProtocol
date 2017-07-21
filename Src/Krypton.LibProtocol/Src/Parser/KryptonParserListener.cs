@@ -63,6 +63,13 @@ namespace Krypton.LibProtocol.Parser
             var parent = _memberContainers.Peek();
             var name = context.IDENTIFIER().GetText();
             
+            // Verify our name is unique
+            IMember existing;
+            if (parent.TryFindMember(name, out existing))
+            {
+                throw new KryptonParserException($"Multiple definitions for {name}.");
+            }
+            
             var lib = new Library(name, parent);
             parent.AddMember(lib);
             
@@ -113,7 +120,14 @@ namespace Krypton.LibProtocol.Parser
 
             TypeDeclarationBase declared;
             var name = context.IDENTIFIER().GetText();
-            
+
+            // Verify our name is unique
+            IMember existing;
+            if (parent.TryFindMember(name, out existing))
+            {
+                throw new KryptonParserException($"Multiple definitions for {name}.");
+            }
+
             // Declare a generic if we have attributes
             var generics = context.generic_type_attributes()?.IDENTIFIER();
             if (generics != null)
@@ -155,6 +169,13 @@ namespace Krypton.LibProtocol.Parser
             var parent = _memberContainers.Peek();
             var name = context.IDENTIFIER().GetText();
 
+            // Verify our name is unique
+            IMember existing;
+            if (parent.TryFindMember(name, out existing))
+            {
+                throw new KryptonParserException($"Multiple definitions for {name}.");
+            }
+            
             var packet = new Packet(name, parent);
             parent.AddMember(packet);
             
@@ -216,6 +237,13 @@ namespace Krypton.LibProtocol.Parser
         {
             var parent = _memberContainers.Peek();
             var name = context.IDENTIFIER().GetText();
+            
+            // Verify our name is unique
+            IMember existing;
+            if (parent.TryFindMember(name, out existing))
+            {
+                throw new KryptonParserException($"Multiple definitions for {name}.");
+            }
             
             var protocol = new Protocol(name, parent);
             parent.AddMember(protocol);

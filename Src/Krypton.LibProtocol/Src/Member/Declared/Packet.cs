@@ -10,6 +10,8 @@ namespace Krypton.LibProtocol.Member.Declared
     {
         public string TemplateName => "packet";
         
+        public Message Message { get; }
+        
         public string Name { get; }
 
         public IEnumerable<IStatement> Statements { get; }
@@ -19,6 +21,11 @@ namespace Krypton.LibProtocol.Member.Declared
         {
             Name = name;
             Statements = new ReadOnlyCollection<IStatement>(_statements);
+        }
+
+        public Packet(string name, IMemberContainer parent, Message message) : this(name, parent)
+        {
+            Message = message;
         }
 
         public void AddStatement(IStatement statement)
