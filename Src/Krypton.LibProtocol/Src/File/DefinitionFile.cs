@@ -97,7 +97,7 @@ namespace Krypton.LibProtocol.File
             AddMember(new BuiltinType("uint64", this));
             AddMember(new BuiltinType("string", this));
             AddMember(new BuiltinType("cstring", this));
-            AddMember(new BuiltinType("array", this));
+            AddMember(new BuiltinType("list", this));
         }
         
         private interface IIncrementalFactory<out T>

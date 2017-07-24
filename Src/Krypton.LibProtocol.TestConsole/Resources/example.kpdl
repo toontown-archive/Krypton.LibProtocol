@@ -13,7 +13,7 @@ library krypton {
     }
     
     declare cluster_info<some_generic> {
-        array<this::client_info<some_generic>> clients;
+        list<this::client_info<some_generic>> clients;
         uint32 uptime;
     }
     

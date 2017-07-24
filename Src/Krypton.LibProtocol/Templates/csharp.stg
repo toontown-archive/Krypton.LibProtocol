@@ -19,7 +19,6 @@ namespace <library.name>
 
 // groups
 group_template(gobj) ::= <<
-<gobj.Name>
 >>
 
 /**
@@ -80,19 +79,14 @@ where <generic.name>: IKryptonType, new()
 typedecl_body(typedecl) ::= <<
 <typedecl.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
 
-public void Consume(Krypton.LibProtocol.BufferReader br)
+public void Read(System.IO.BinaryReader br)
 {
-    <typedecl.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Consume(br);}; separator="\n">
+    <typedecl.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
 }
 
-public void Write(Krypton.LibProtocol.BufferWriter bw)
+public void Write(System.IO.BinaryWriter bw)
 {
     <typedecl.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
-}
-
-public void Build(Krypton.LibProtocol.BufferReader br)
-{
-    <typedecl.Statements: {s | <([s.TemplateName, "_builder"])(s)>}; separator="\n">
 }
 >>
 
@@ -100,13 +94,13 @@ public void Build(Krypton.LibProtocol.BufferReader br)
     STATEMENTS
 */
 
-type_statement_builder(statement) ::= <<
+type_statement_reader(statement) ::= <<
 <s.name> = Krypton.LibProtocol.KryptonType\<<formal_typeref(statement.Type)>\>.Create();
-<s.name>.Build(br);
+<s.name>.Read(br);
 >>
 
-if_statement_builder(statement) ::= <<
-<statement.Statements: {s | <([s.TemplateName, "_builder"])(s)>}; separator="\n">
+if_statement_reader(statement) ::= <<
+<statement.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
 >>
 
 type_statement_ref(statement) ::= <<
