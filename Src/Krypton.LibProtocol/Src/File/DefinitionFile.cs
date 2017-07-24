@@ -87,9 +87,8 @@ namespace Krypton.LibProtocol.File
         {
             AddMember(new BuiltinType("bool", this));
             AddMember(new BuiltinType("byte", this));
+            AddMember(new BuiltinType("sbyte", this));
             AddMember(new BuiltinType("buffer", this));
-            AddMember(new BuiltinType("int8", this));
-            AddMember(new BuiltinType("uint8", this));
             AddMember(new BuiltinType("int16", this));
             AddMember(new BuiltinType("uint16", this));
             AddMember(new BuiltinType("int32", this));

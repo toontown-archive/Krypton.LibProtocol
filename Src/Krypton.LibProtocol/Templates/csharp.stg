@@ -148,9 +148,8 @@ resolve_generic_attribute(generic) ::= <<
 // Builtin types to their perspective class names
 builtin_type ::= [
     "byte": "Numericals.ByteType",
+    "sbyte": "Numericals.SByteType",
     "bool": "Numericals.BoolType",
-    "int8": "Numericals.Int8Type",
-    "uint8": "Numericals.UInt8Type",
     "int16": "Numericals.Int16Type",
     "uint16": "Numericals.UInt16Type",
     "int32": "Numericals.Int32Type",

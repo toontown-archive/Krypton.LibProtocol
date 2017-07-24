@@ -12,19 +12,17 @@ KPDL : 'kpdl' ;
 
 BUILTIN_TYPE 
   : BOOL
-  | BYTE | BUFFER
-  | INT8 | UINT8 
+  | BYTE | SBYTE
   | INT16 | UINT16
   | INT32 | UINT32
   | INT64 | UINT64
   | STRING | CSTRING
-  | LIST
+  | BUFFER | LIST
   ;
 
 fragment BYTE : 'byte' ;
+fragment SBYTE : 'sbyte' ;
 fragment BOOL : 'bool' ;
-fragment INT8 : 'int8' ;
-fragment UINT8 : 'uint8' ;
 fragment INT16 : 'int16' ;
 fragment UINT16 : 'uint16' ;
 fragment INT32 : 'int32' ;
