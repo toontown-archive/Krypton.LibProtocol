@@ -55,14 +55,14 @@ packet_parent_builder(packet) ::= <<
 */
 
 typedecl_template(typedecl) ::= <<
-public class <typedecl.name> : <as_krypton_type(typedecl.name)>
+public struct <typedecl.name> : IKryptonType
 {
     <typedecl_body(typedecl)>
 }
 >>
 
 generic_typedecl_template(typedecl) ::= <<
-public class <generic_decl_name(typedecl)> : <as_krypton_type(generic_decl_name(typedecl))>
+public struct <generic_decl_name(typedecl)> : IKryptonType
     <typedecl.Generics:generic_constraint(); separator="\n">
 {
     <typedecl_body(typedecl)>
@@ -74,23 +74,23 @@ generic_decl_name(typedecl) ::= <<
 >>
 
 generic_constraint(generic) ::= <<
-where <generic.name>: <as_krypton_type(generic.name)>, new()
+where <generic.name>: IKryptonType, new()
 >>
 
 typedecl_body(typedecl) ::= <<
 <typedecl.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
 
-public override void Consume(Krypton.LibProtocol.BufferReader br)
+public void Consume(Krypton.LibProtocol.BufferReader br)
 {
     <typedecl.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Consume(br);}; separator="\n">
 }
 
-public override void Write(Krypton.LibProtocol.BufferWriter bw)
+public void Write(Krypton.LibProtocol.BufferWriter bw)
 {
     <typedecl.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
 }
 
-public override void Build(Krypton.LibProtocol.BufferReader br)
+public void Build(Krypton.LibProtocol.BufferReader br)
 {
     <typedecl.Statements: {s | <([s.TemplateName, "_builder"])(s)>}; separator="\n">
 }
@@ -145,24 +145,20 @@ resolve_generic_attribute(generic) ::= <<
 <generic.name>
 >>
 
-as_krypton_type(name) ::= <<
-Krypton.LibProtocol.Type.KryptonType\<<name>\>
->>
-
 // Builtin types to their perspective class names
 builtin_type ::= [
-    "byte": "ByteType",
-    "bool": "BoolType",
-    "int8": "Int8Type",
-    "uint8": "UInt8Type",
-    "int16": "Int16Type",
-    "uint16": "UInt16Type",
-    "int32": "Int32Type",
-    "uint32": "UInt32Type",
-    "int64": "Int64Type",
-    "uint64": "UInt64Type",
-    "string": "StringType",
-    "cstring": "CStringType",
-    "buffer": "BufferType",
-    "list": "ListType"
+    "byte": "Numericals.ByteType",
+    "bool": "Numericals.BoolType",
+    "int8": "Numericals.Int8Type",
+    "uint8": "Numericals.UInt8Type",
+    "int16": "Numericals.Int16Type",
+    "uint16": "Numericals.UInt16Type",
+    "int32": "Numericals.Int32Type",
+    "uint32": "Numericals.UInt32Type",
+    "int64": "Numericals.Int64Type",
+    "uint64": "Numericals.UInt64Type",
+    "string": "Collections.StringType",
+    "cstring": "Collections.CStringType",
+    "buffer": "Collections.BufferType",
+    "list": "Collections.ListType"
 ]
