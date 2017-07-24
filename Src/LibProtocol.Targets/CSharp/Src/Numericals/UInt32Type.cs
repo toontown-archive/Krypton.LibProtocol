@@ -1,6 +1,6 @@
-﻿namespace Krypton.LibProtocol.Type
+﻿namespace Krypton.LibProtocol.Numericals
 {
-    public class UInt32Type : KryptonType<UInt32Type>
+    public struct UInt32Type : IKryptonType
     {
         public uint Value { get; set; }
 
@@ -14,17 +14,17 @@
             return val.Value;
         }
         
-        public override void Write(BufferWriter bw)
+        public void Write(BufferWriter bw)
         {
             bw.WriteUInt32(Value);
         }
 
-        public override void Consume(BufferReader br)
+        public void Consume(BufferReader br)
         {
             Value = br.ReadUInt32();
         }
         
-        public override void Build(BufferReader br)
+        public void Build(BufferReader br)
         {
             Consume(br);
         }

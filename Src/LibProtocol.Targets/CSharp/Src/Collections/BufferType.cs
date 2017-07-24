@@ -1,8 +1,8 @@
-﻿namespace Krypton.LibProtocol.Type
+﻿namespace Krypton.LibProtocol.Collections
 {
-    public class BufferType : KryptonType<BufferType>
+    public struct BufferType : IKryptonType
     {
-        public byte[] Value { get; set; }
+        public byte[] Value;
 
         #region BufferWriter casts
         
@@ -46,18 +46,18 @@
         
         #endregion
         
-        public override void Write(BufferWriter bw)
+        public void Write(BufferWriter bw)
         {
             bw.WriteBytes(Value);
         }
 
-        public override void Consume(BufferReader br)
+        public void Consume(BufferReader br)
         {
             Value = br.Bytes;
             br.SkipBytes(Value.Length);
         }
         
-        public override void Build(BufferReader br)
+        public void Build(BufferReader br)
         {
             Consume(br);
         }

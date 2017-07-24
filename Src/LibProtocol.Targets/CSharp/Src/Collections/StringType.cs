@@ -1,6 +1,6 @@
-﻿namespace Krypton.LibProtocol.Type
+﻿namespace Krypton.LibProtocol.Collections
 {
-    public class StringType : KryptonType<StringType>
+    public struct StringType : IKryptonType
     {
         public string Value { get; set; }
 
@@ -14,17 +14,17 @@
             return val.Value;
         }
         
-        public override void Write(BufferWriter bw)
+        public void Write(BufferWriter bw)
         {
             bw.WriteString(Value);
         }
 
-        public override void Consume(BufferReader br)
+        public void Consume(BufferReader br)
         {
             Value = br.ReadString();
         }
         
-        public override void Build(BufferReader br)
+        public void Build(BufferReader br)
         {
             Consume(br);
         }

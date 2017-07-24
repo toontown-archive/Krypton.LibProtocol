@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection.Emit;
 
-namespace Krypton.LibProtocol.Type
+namespace Krypton.LibProtocol
 {
     public interface IKryptonType
     {
@@ -17,11 +17,13 @@ namespace Krypton.LibProtocol.Type
         /// </summary>
         /// <param name="br"></param>
         void Consume(BufferReader br);
+
+        void Build(BufferReader br);
     }
 
-    public abstract class KryptonType<T> : IKryptonType where T: KryptonType<T>, new()
+    public abstract class KryptonType<T> : IKryptonType where T: IKryptonType, new()
     {
-        private static Func<TK> GenerateFactory<TK>() where TK: KryptonType<T>, new()
+        private static Func<TK> GenerateFactory<TK>() where TK: IKryptonType, new()
         {
             Expression<Func<TK>> expr = () => new TK();
             var newExpr = (NewExpression)expr.Body;

@@ -1,6 +1,6 @@
-﻿namespace Krypton.LibProtocol.Type
+﻿namespace Krypton.LibProtocol.Numericals
 {
-    public class Int16Type : KryptonType<Int16Type>
+    public struct Int16Type : IKryptonType
     {
         public short Value { get; set; }
 
@@ -14,17 +14,17 @@
             return val.Value;
         }
         
-        public override void Write(BufferWriter bw)
+        public void Write(BufferWriter bw)
         {
             bw.WriteInt16(Value);
         }
 
-        public override void Consume(BufferReader br)
+        public void Consume(BufferReader br)
         {
             Value = br.ReadInt16();
         }
         
-        public override void Build(BufferReader br)
+        public void Build(BufferReader br)
         {
             Consume(br);
         }

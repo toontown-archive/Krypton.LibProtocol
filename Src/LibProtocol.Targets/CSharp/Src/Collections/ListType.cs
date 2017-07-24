@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Krypton.LibProtocol.Type
+namespace Krypton.LibProtocol.Collections
 {
-    public class ListType<TK> : KryptonType<ListType<TK>> where TK: KryptonType<TK>, new() 
+    public class ListType<TK> : IKryptonType where TK: IKryptonType, new()
     {
         public List<TK> Value { get; set; }
 
@@ -17,7 +16,7 @@ namespace Krypton.LibProtocol.Type
             return val.Value;
         }
         
-        public override void Write(BufferWriter bw)
+        public void Write(BufferWriter bw)
         {
             bw.WriteUInt16((ushort)Value.Count);
             foreach (var val in Value)
@@ -26,7 +25,7 @@ namespace Krypton.LibProtocol.Type
             }
         }
 
-        public override void Consume(BufferReader br)
+        public void Consume(BufferReader br)
         {
             Value = new List<TK>();
             var length = br.ReadUInt16();
@@ -39,7 +38,7 @@ namespace Krypton.LibProtocol.Type
             }
         }
 
-        public override void Build(BufferReader br)
+        public void Build(BufferReader br)
         {
             Consume(br);
         }
