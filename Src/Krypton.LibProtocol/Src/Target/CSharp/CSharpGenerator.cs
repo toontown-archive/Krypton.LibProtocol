@@ -54,7 +54,7 @@ namespace Krypton.LibProtocol.Target.CSharp
             {
                 if (typeref.Scope is DefinitionFile)
                 {
-                    return "Krypton.LibProtocol.Type";
+                    return "Krypton.LibProtocol";
                 }
 
                 var namespaces = new List<string>();
@@ -64,6 +64,11 @@ namespace Krypton.LibProtocol.Target.CSharp
                 {
                     namespaces.Add(currentMem.Name.ToCamelCase());
                     currentMem = currentMem.Parent as IMember;
+                }
+
+                if (namespaces.Count == 0)
+                {
+                    return null;
                 }
 
                 namespaces.Reverse();

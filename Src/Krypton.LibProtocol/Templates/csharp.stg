@@ -101,7 +101,7 @@ public void Build(Krypton.LibProtocol.BufferReader br)
 */
 
 type_statement_builder(statement) ::= <<
-<s.name> = <if(statement.Type.namespace)><formal_typeref(statement.Type)><else><as_krypton_type(formal_typeref(statement.Type))><endif>.Create();
+<s.name> = Krypton.LibProtocol.KryptonType\<<formal_typeref(statement.Type)>\>.Create();
 <s.name>.Build(br);
 >>
 
