@@ -1,9 +1,9 @@
-﻿namespace Krypton.LibProtocol.Numericals
+﻿using System.IO;
+
+namespace Krypton.LibProtocol.Numericals
 {
     public struct Int32Type : IKryptonType
     {
-        public int Value { get; set; }
-
         public static implicit operator Int32Type(int val)
         {
             return new Int32Type { Value = val };
@@ -13,20 +13,17 @@
         {
             return val.Value;
         }
+
+        public int Value;
         
-        public void Write(BufferWriter bw)
+        public void Write(BinaryWriter bw)
         {
-            bw.WriteInt32(Value);
+            bw.Write(Value);
         }
 
-        public void Consume(BufferReader br)
+        public void Read(BinaryReader br)
         {
             Value = br.ReadInt32();
-        }
-        
-        public void Build(BufferReader br)
-        {
-            Consume(br);
         }
     }
 }

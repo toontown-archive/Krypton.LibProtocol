@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
 
@@ -10,15 +11,13 @@ namespace Krypton.LibProtocol
         /// Writes the type to a BufferWriter
         /// </summary>
         /// <param name="bw"></param>
-        void Write(BufferWriter bw);
+        void Write(BinaryWriter bw);
 
         /// <summary>
         /// Populates the type with data read from the BufferReader
         /// </summary>
         /// <param name="br"></param>
-        void Consume(BufferReader br);
-
-        void Build(BufferReader br);
+        void Read(BinaryReader br);
     }
 
     public abstract class KryptonType<T> : IKryptonType where T: IKryptonType, new()
@@ -43,23 +42,32 @@ namespace Krypton.LibProtocol
         }
         
         public static readonly Func<T> Create = GenerateFactory<T>();
-        
+
         /// <summary>
         /// Creates and populates a type from the BufferReader
         /// </summary>
-        /// <param name="br"></param>
+        /// <param name="s"></param>
         /// <returns></returns>
-        public static T Read(BufferReader br)
+        public static T Build(Stream s)
         {
             var inst = Create();
-            inst.Build(br);
+            using (var br = new BinaryReader(s))
+            {
+                inst.Read(br);
+            }
             return inst;
         }
 
-        public abstract void Build(BufferReader br);
-        
-        public abstract void Write(BufferWriter bw);
+        public static void Pack(IKryptonType type, Stream s)
+        {
+            using (var bw = new BinaryWriter(s))
+            {
+                type.Write(bw);
+            }
+        }
 
-        public abstract void Consume(BufferReader br);
+        public abstract void Write(BinaryWriter bw);
+
+        public abstract void Read(BinaryReader br);
     }
 }

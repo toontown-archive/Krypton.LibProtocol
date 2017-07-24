@@ -2,20 +2,20 @@
 
 namespace Krypton.LibProtocol.Numericals
 {
-    public struct ByteType : IKryptonType
+    public struct SByteType : IKryptonType
     {
-        public static implicit operator ByteType(byte val)
+        public static implicit operator SByteType(sbyte val)
         {
-            return new ByteType { Value = val };
+            return new SByteType { Value = val };
         }
         
-        public static implicit operator byte(ByteType val)
+        public static implicit operator sbyte(SByteType val)
         {
             return val.Value;
         }
 
-        public byte Value;
-
+        public sbyte Value;
+        
         public void Write(BinaryWriter bw)
         {
             bw.Write(Value);
@@ -23,7 +23,7 @@ namespace Krypton.LibProtocol.Numericals
 
         public void Read(BinaryReader br)
         {
-            Value = br.ReadByte();
+            Value = br.ReadSByte();
         }
     }
 }

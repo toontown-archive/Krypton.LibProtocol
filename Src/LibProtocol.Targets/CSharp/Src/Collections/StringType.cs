@@ -1,9 +1,9 @@
-﻿namespace Krypton.LibProtocol.Collections
+﻿using System.IO;
+
+namespace Krypton.LibProtocol.Collections
 {
     public struct StringType : IKryptonType
     {
-        public string Value { get; set; }
-
         public static implicit operator StringType(string val)
         {
             return new StringType { Value = val };
@@ -13,20 +13,19 @@
         {
             return val.Value;
         }
+
+        public string Value;
         
-        public void Write(BufferWriter bw)
+        public void Write(BinaryWriter bw)
         {
-            bw.WriteString(Value);
+            bw.Write((ushort)Value.Length);
+            bw.Write(Value.ToCharArray());
         }
 
-        public void Consume(BufferReader br)
+        public void Read(BinaryReader br)
         {
-            Value = br.ReadString();
-        }
-        
-        public void Build(BufferReader br)
-        {
-            Consume(br);
+            var length = br.ReadUInt16();
+            Value = new string(br.ReadChars(length));
         }
     }
 }

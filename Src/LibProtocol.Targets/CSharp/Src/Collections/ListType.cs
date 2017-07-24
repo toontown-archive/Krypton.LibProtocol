@@ -1,34 +1,30 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Krypton.LibProtocol.Collections
 {
     public class ListType<TK> : List<TK>, IKryptonType where TK: IKryptonType, new()
     {
-        public void Write(BufferWriter bw)
+        public void Write(BinaryWriter bw)
         {
-            bw.WriteUInt16((ushort)Count);
+            bw.Write((ushort)Count);
             foreach (var val in this)
             {
                 val.Write(bw);
             }
         }
 
-        public void Consume(BufferReader br)
+        public void Read(BinaryReader br)
         {
             Clear();
             var length = br.ReadUInt16();
 
             for (var i = 0; i < length; i++)
             {
-                var x = KryptonType<TK>.Read(br);
-                
+                var x = KryptonType<TK>.Create();
+                x.Read(br);
                 Add(x);
             }
-        }
-
-        public void Build(BufferReader br)
-        {
-            Consume(br);
         }
     }
 }

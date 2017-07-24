@@ -1,39 +1,9 @@
-﻿namespace Krypton.LibProtocol.Collections
+﻿using System.IO;
+
+namespace Krypton.LibProtocol.Collections
 {
     public struct BufferType : IKryptonType
     {
-        public byte[] Value;
-
-        #region BufferWriter casts
-        
-        public static implicit operator BufferType(BufferWriter val)
-        {
-            return new BufferType { Value = val.Bytes };
-        }
-        
-        public static implicit operator BufferWriter(BufferType val)
-        {
-            return new BufferWriter(val.Value);
-        }
-        
-        #endregion
-        
-        #region BufferReader casts
-        
-        public static implicit operator BufferType(BufferReader val)
-        {
-            return new BufferType { Value = val.Bytes };
-        }
-        
-        public static implicit operator BufferReader(BufferType val)
-        {
-            return new BufferReader(val.Value);
-        }
-        
-        #endregion
-        
-        #region byte[] casts
-        
         public static implicit operator BufferType(byte[] val)
         {
             return new BufferType { Value = val };
@@ -44,22 +14,17 @@
             return val.Value;
         }
         
-        #endregion
+        public byte[] Value;
         
-        public void Write(BufferWriter bw)
+        public void Write(BinaryWriter bw)
         {
-            bw.WriteBytes(Value);
+            bw.Write(Value, 0 , Value.Length);
         }
 
-        public void Consume(BufferReader br)
+        public void Read(BinaryReader br)
         {
-            Value = br.Bytes;
-            br.SkipBytes(Value.Length);
-        }
-        
-        public void Build(BufferReader br)
-        {
-            Consume(br);
+            Value = new byte[br.BaseStream.Length];
+            br.Read(Value, 0, Value.Length);
         }
     }
 }

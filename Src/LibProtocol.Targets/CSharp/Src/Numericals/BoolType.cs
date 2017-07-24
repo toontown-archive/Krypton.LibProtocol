@@ -1,9 +1,9 @@
-﻿namespace Krypton.LibProtocol.Numericals
+﻿using System.IO;
+
+namespace Krypton.LibProtocol.Numericals
 {
     public struct BoolType : IKryptonType
     {
-        public bool Value { get; set; }
-        
         public static implicit operator BoolType(bool val)
         {
             return new BoolType { Value = val };
@@ -14,19 +14,16 @@
             return val.Value;
         }
 
-        public void Write(BufferWriter bw)
+        public bool Value;
+
+        public void Write(BinaryWriter bw)
         {
-            bw.WriteBool(Value);
+            bw.Write(Value);
         }
 
-        public void Consume(BufferReader br)
+        public void Read(BinaryReader br)
         {
-            Value = br.ReadBool();
-        }
-        
-        public void Build(BufferReader br)
-        {
-            Consume(br);
+            Value = br.ReadBoolean();
         }
     }
 }
