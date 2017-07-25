@@ -6,6 +6,7 @@ using Krypton.LibProtocol.Extensions;
 using Krypton.LibProtocol.File;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Common;
+using Krypton.LibProtocol.Member.Declared;
 using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Target.CSharp
@@ -45,6 +46,7 @@ namespace Krypton.LibProtocol.Target.CSharp
         {
             template.RegisterRenderer(typeof(Documentation), new DocumentationRenderer());
             template.RegisterModelAdaptor(typeof(ITypeReference), new ITypeReferenceAdaptor());
+            template.RegisterModelAdaptor(typeof(Packet), new PacketReferenceAdaptor());
             
             // register base model adaptors as fallbacks
             template.RegisterModelAdaptor(typeof(INameable), new INameableModelAdaptor());
@@ -56,6 +58,26 @@ namespace Krypton.LibProtocol.Target.CSharp
             {
                 var documentation = obj as Documentation;
                 return documentation.Text;
+            }
+        }
+
+        private class PacketReferenceAdaptor : TargetModelAdaptor
+        {
+            [Model("classpath")]
+            public string Path(Packet packet)
+            {
+                var namespaces = new List<string>();
+
+                var currentMem = packet.Parent as IMember;
+                while (currentMem != null)
+                {
+                    namespaces.Add(currentMem.Name.ToCamelCase());
+                    currentMem = currentMem.Parent as IMember;
+                }
+                
+                namespaces.Reverse();
+                namespaces.Add(packet.Name.ToCamelCase());
+                return string.Join(".", namespaces);
             }
         }
 

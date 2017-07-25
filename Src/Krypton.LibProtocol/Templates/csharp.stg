@@ -26,29 +26,89 @@ group_template(gobj) ::= <<
     PROTOCOL DECLARATION
 */
 protocol_template(protocol) ::= <<
-public class <protocol.name>
+namespace <protocol.name>
 {
     <target_members(protocol)>
 }
 >>
 
-// messages
-message_template(message) ::= <<
-public const ushort <message.name> = <message.Id>;
+protocol_pair_template(pair) ::= <<
+<pair.Message.Documentation>
+public class <pair.name>
+{
+    public const int Id = <if(pair.Message)><pair.Message.Id><else>-1<endif>;
+    
+    <if(pair.Packet)>
+    <pair_packet_body(pair.Packet)>
+    <else>
+    public class Structure : Krypton.LibProtocol.IKryptonType
+    {
+        public void Read(System.IO.BinaryReader br)
+        {
+            throw new System.NotImplementedException();
+        }
+        
+        public void Write(System.IO.BinaryWriter bw)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+    <endif>
+}
+>>
+
+pair_packet_body(packet) ::= <<
+<packet.Documentation>
+public class Structure <packet_parent_builder(packet)>
+{
+    <packet.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
+    
+    public override void Read(System.IO.BinaryReader br)
+    {
+        <if(packet.SubPacket)>base.Read(br);<endif>
+        <packet.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
+    }
+    
+    public override void Write(System.IO.BinaryWriter bw)
+    {
+        <if(packet.SubPacket)>base.Write(bw);<endif>
+        <packet.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
+    }
+}
+>>
+
+// Parent builder
+packet_parent_builder(packet) ::= <<
+<if(packet.SubPacket)>
+: <packet.Members: {m | <m.classpath>}; separator=",">
+<else>
+: Krypton.LibProtocol.IKryptonType
+<endif>
 >>
 
 /**
     PACKET DECLARATION
 */
 packet_template(packet) ::= <<
-public class <packet.Name> <packet_parent_builder(packet)>
+public abstract class <packet.Name> : Krypton.LibProtocol.IKryptonType
 {
+    <packet_body(packet)>
 }
 >>
 
-// Parent builder
-packet_parent_builder(packet) ::= <<
-<packet.Members: {m | <m.Name>}; separator=",">
+// packet body
+packet_body(packet) ::= <<
+<packet.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
+
+public virtual void Read(System.IO.BinaryReader br)
+{
+    <packet.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
+}
+
+public virtual void Write(System.IO.BinaryWriter bw)
+{
+    <packet.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
+}
 >>
 
 /**
@@ -56,14 +116,14 @@ packet_parent_builder(packet) ::= <<
 */
 
 typedecl_template(typedecl) ::= <<
-public struct <typedecl.name> : IKryptonType
+public struct <typedecl.name> : Krypton.LibProtocol.IKryptonType
 {
     <typedecl_body(typedecl)>
 }
 >>
 
 generic_typedecl_template(typedecl) ::= <<
-public struct <generic_decl_name(typedecl)> : IKryptonType
+public struct <generic_decl_name(typedecl)> : Krypton.LibProtocol.IKryptonType
     <typedecl.Generics:generic_constraint(); separator="\n">
 {
     <typedecl_body(typedecl)>
@@ -75,7 +135,7 @@ generic_decl_name(typedecl) ::= <<
 >>
 
 generic_constraint(generic) ::= <<
-where <generic.name>: IKryptonType, new()
+where <generic.name>: Krypton.LibProtocol.IKryptonType, new()
 >>
 
 typedecl_body(typedecl) ::= <<
