@@ -6,7 +6,7 @@ using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member.Declared
 {
-    public class Packet : NestedMemberContainer, IMember, IStatementContainer, ICustomizable, ITemplateType, INameable
+    public class Packet : NestedMemberContainer, IMember, IStatementContainer, ICustomizable, ITemplateType, INameable, IDocumentable
     {
         public string TemplateName => "packet";
         
@@ -14,6 +14,8 @@ namespace Krypton.LibProtocol.Member.Declared
         
         public string Name { get; }
 
+        public Documentation Documentation { get; private set; }
+        
         public IEnumerable<IStatement> Statements { get; }
         private readonly IList<IStatement> _statements = new List<IStatement>();
         
@@ -31,6 +33,11 @@ namespace Krypton.LibProtocol.Member.Declared
         public void AddStatement(IStatement statement)
         {
             _statements.Add(statement);
+        }
+        
+        public void SetDocumentation(Documentation documentation)
+        {
+            Documentation = documentation;
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using Krypton.LibProtocol.Extensions;
+using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Statement;
 using Krypton.LibProtocol.Member.Type;
 
@@ -9,7 +11,7 @@ namespace Krypton.LibProtocol.Member.Declared.Type
     /// <summary>
     /// DeclaredTypeBase is an abstract class implemented by types declared inside a Library
     /// </summary>
-    public abstract class TypeDeclarationBase : IMember, IStatementContainer, INameable
+    public abstract class TypeDeclarationBase : IMember, IStatementContainer, INameable, IDocumentable
     {   
         /// <summary>
         /// The name of the decalred type
@@ -26,6 +28,8 @@ namespace Krypton.LibProtocol.Member.Declared.Type
         /// </summary>
         public IEnumerable<IStatement> Statements { get; }
 
+        public Documentation Documentation { get; private set; }
+        
         private readonly IList<IStatement> _statements = new List<IStatement>();
 
         protected TypeDeclarationBase(string name, IMemberContainer parent)
@@ -38,6 +42,11 @@ namespace Krypton.LibProtocol.Member.Declared.Type
         public void AddStatement(IStatement statement)
         {
             _statements.Add(statement);
+        }
+
+        public void SetDocumentation(Documentation documentation)
+        {
+            Documentation = documentation;
         }
     }
 }

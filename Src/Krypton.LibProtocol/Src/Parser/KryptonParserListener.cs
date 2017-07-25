@@ -78,6 +78,7 @@ namespace Krypton.LibProtocol.Parser
             _memberContainers.Push(lib);
             _contextStack.Push(lib);
             _customizables.Push(lib);
+            _documentables.Push(lib);
         }
 
 
@@ -91,6 +92,7 @@ namespace Krypton.LibProtocol.Parser
             _memberContainers.Pop();
             _contextStack.Pop();
             _customizables.Pop();
+            _documentables.Pop();
         }
 
         /// <summary>
@@ -106,8 +108,13 @@ namespace Krypton.LibProtocol.Parser
 
             var group = _file.GroupFactory.Create(name, parent);
             parent.AddMember(group);
-            
-            base.EnterGroup_definition(context);
+
+            _documentables.Push(group);
+        }
+
+        public override void ExitGroup_definition(KryptonParser.Group_definitionContext context)
+        {
+            _documentables.Pop();
         }
 
         /// <summary>
@@ -149,6 +156,7 @@ namespace Krypton.LibProtocol.Parser
 
             parent.AddMember(declared);
             _statementContainers.Push(declared);
+            _documentables.Push(declared);
         }
 
         /// <summary>
@@ -158,6 +166,7 @@ namespace Krypton.LibProtocol.Parser
         public override void ExitType_declaration(KryptonParser.Type_declarationContext context)
         {
             _statementContainers.Pop();
+            _documentables.Pop();
         }
 
         /// <summary>
@@ -184,6 +193,7 @@ namespace Krypton.LibProtocol.Parser
             _memberContainers.Push(packet);
             _statementContainers.Push(packet);
             _customizables.Push(packet);
+            _documentables.Push(packet);
         }
 
         /// <summary>
@@ -195,6 +205,7 @@ namespace Krypton.LibProtocol.Parser
             _memberContainers.Pop();
             _statementContainers.Pop();
             _customizables.Pop();
+            _documentables.Pop();
         }
 
         /// <summary>
@@ -251,6 +262,7 @@ namespace Krypton.LibProtocol.Parser
             parent.AddMember(protocol);
             
             _memberContainers.Push(protocol);
+            _documentables.Push(protocol);
         }
 
         /// <summary>
@@ -260,6 +272,7 @@ namespace Krypton.LibProtocol.Parser
         public override void ExitProtocol_definition(KryptonParser.Protocol_definitionContext context)
         {
             _memberContainers.Pop();
+            _documentables.Pop();
         }
 
         /// <summary>
@@ -275,6 +288,13 @@ namespace Krypton.LibProtocol.Parser
 
             var message = _file.MessageFactory.Create(name, parent);
             parent.AddMember(message);
+
+            _documentables.Push(message);
+        }
+
+        public override void ExitMessage_definition(KryptonParser.Message_definitionContext context)
+        {
+            _documentables.Pop();
         }
 
         /// <summary>
