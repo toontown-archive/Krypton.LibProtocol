@@ -66,8 +66,7 @@ namespace Krypton.LibProtocol.Parser
             var name = context.IDENTIFIER().GetText();
             
             // Verify our name is unique
-            IMember existing;
-            if (parent.TryFindMember(name, out existing))
+            if (parent.TryFindMember(name, out var _))
             {
                 throw new KryptonParserException($"Multiple definitions for {name}.");
             }
@@ -129,8 +128,7 @@ namespace Krypton.LibProtocol.Parser
             var name = context.IDENTIFIER().GetText();
 
             // Verify our name is unique
-            IMember existing;
-            if (parent.TryFindMember(name, out existing))
+            if (parent.TryFindMember(name, out var _))
             {
                 throw new KryptonParserException($"Multiple definitions for {name}.");
             }
@@ -178,9 +176,8 @@ namespace Krypton.LibProtocol.Parser
             var parent = _memberContainers.Peek();
             var name = context.IDENTIFIER().GetText();
 
-            // Verify our name is unique
-            IMember existing;
-            if (parent.TryFindMember(name, out existing))
+            // Verify our name is unique (with the exception of messages)
+            if (parent.TryFindMember(name, out var existing) && !(existing is Message))
             {
                 throw new KryptonParserException($"Multiple definitions for {name}.");
             }
@@ -250,8 +247,7 @@ namespace Krypton.LibProtocol.Parser
             var name = context.IDENTIFIER().GetText();
             
             // Verify our name is unique
-            IMember existing;
-            if (parent.TryFindMember(name, out existing))
+            if (parent.TryFindMember(name, out var _))
             {
                 throw new KryptonParserException($"Multiple definitions for {name}.");
             }
@@ -284,6 +280,12 @@ namespace Krypton.LibProtocol.Parser
             var parent = _memberContainers.Peek();
             var name = context.IDENTIFIER().GetText();
 
+            // Verify our name is unique
+            if (parent.TryFindMember(name, out var _))
+            {
+                throw new KryptonParserException($"Multiple definitions for {name}.");
+            }
+            
             var message = _file.MessageFactory.Create(name, parent);
             parent.AddMember(message);
 
