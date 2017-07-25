@@ -65,7 +65,7 @@ namespace Krypton.LibProtocol.File
             var tokens = new CommonTokenStream(lexer); 
             var parser = new KryptonParser(tokens);
 
-            var walker = new KryptonParseTreeWalker(name);
+            var walker = new KryptonParseTreeWalker(name, tokens);
             var listener = new KryptonParserListener(this);
 
             try
