@@ -81,14 +81,12 @@ namespace Krypton.LibProtocol.Parser
             _documentables.Push(lib);
         }
 
-
         /// <summary>
         /// Library declaration departure.
         /// </summary>
         /// <param name="context"></param>
         public override void ExitLibrary_declaration(KryptonParser.Library_declarationContext context)
         {
-            Console.Out.WriteLine(_contextStack.Count); //dbg
             _memberContainers.Pop();
             _contextStack.Pop();
             _customizables.Pop();

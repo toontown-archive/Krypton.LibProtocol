@@ -1,9 +1,10 @@
-init(root) ::= <<
-<([root.TemplateName, "_template"])(root)>
+render_member(member) ::= <<
+<member.Documentation>
+<([member.TemplateName, "_template"])(member)>
 >>
 
 target_members(container) ::= <<
-<container.Members: {m | <([m.TemplateName, "_template"])(m)>}; separator="\n">
+<container.Members:render_member(); separator="\n">
 >>
 
 /**
@@ -33,6 +34,7 @@ public class <protocol.name>
 
 // messages
 message_template(message) ::= <<
+public const ushort <message.name> = <message.Id>;
 >>
 
 /**

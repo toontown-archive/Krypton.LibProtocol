@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using Antlr4.StringTemplate;
 using Krypton.LibProtocol.Extensions;
 using Krypton.LibProtocol.File;
 using Krypton.LibProtocol.Member;
+using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Target.CSharp
@@ -30,8 +32,8 @@ namespace Krypton.LibProtocol.Target.CSharp
                     continue;
                 }
 
-                var targetdecl = template.GetInstanceOf("init");
-                targetdecl.Add("root", member);
+                var targetdecl = template.GetInstanceOf("render_member");
+                targetdecl.Add("member", member);
                 var render = targetdecl.Render();
                 
                 var path = Path.Combine(settings.OutDirectory, $"{member.Name}.cs");
@@ -41,10 +43,20 @@ namespace Krypton.LibProtocol.Target.CSharp
 
         private static void RegisterModelAdaptors(TemplateGroup template)
         {
+            template.RegisterRenderer(typeof(Documentation), new DocumentationRenderer());
             template.RegisterModelAdaptor(typeof(ITypeReference), new ITypeReferenceAdaptor());
             
-            // register the base model adaptors as fallbacks
+            // register base model adaptors as fallbacks
             template.RegisterModelAdaptor(typeof(INameable), new INameableModelAdaptor());
+        }
+
+        private class DocumentationRenderer : IAttributeRenderer
+        {
+            public string ToString(object obj, string formatString, CultureInfo culture)
+            {
+                var documentation = obj as Documentation;
+                return documentation.Text;
+            }
         }
 
         private class ITypeReferenceAdaptor : TargetModelAdaptor
