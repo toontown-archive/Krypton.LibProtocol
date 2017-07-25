@@ -13,6 +13,8 @@ namespace Krypton.LibProtocol.Member.Declared
         public string Name { get; }
 
         public Documentation Documentation { get; private set; }
+
+        public bool SubPacket => MemberList.Count != 0;
         
         public IEnumerable<IStatement> Statements { get; }
         private readonly IList<IStatement> _statements = new List<IStatement>();

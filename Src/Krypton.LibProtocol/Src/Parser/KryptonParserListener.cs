@@ -176,8 +176,8 @@ namespace Krypton.LibProtocol.Parser
             var parent = _memberContainers.Peek();
             var name = context.IDENTIFIER().GetText();
 
-            // Verify our name is unique (with the exception of messages)
-            if (parent.TryFindMember(name, out var existing) && !(existing is Message))
+            // Verify our name is unique (with the exception of pairs)
+            if (parent.TryFindMember(name, out var existing) && !(existing is ProtocolPair))
             {
                 throw new KryptonParserException($"Multiple definitions for {name}.");
             }

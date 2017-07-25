@@ -19,7 +19,7 @@ namespace Krypton.LibProtocol.Member
             Members = new ReadOnlyCollection<IMember>(MemberList);
         }
 
-        public void AddMember(IMember member)
+        public virtual void AddMember(IMember member)
         {
             MemberList.Add(member);
         }

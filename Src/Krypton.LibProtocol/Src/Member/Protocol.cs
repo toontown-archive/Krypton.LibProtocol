@@ -5,20 +5,19 @@ using Krypton.LibProtocol.Target;
 
 namespace Krypton.LibProtocol.Member
 {
-    public struct ProtocolPair
+    public class ProtocolPair : IMember, ITemplateType, INameable
     {
+        public string TemplateName => "protocol_pair";
+        
+        /// <summary>
+        /// The name of the pair
+        /// </summary>
+        public string Name { get; set; }
+
         public Packet Packet { get; set; }
         public Message Message { get; set; }
-
-        public void Include(Packet packet)
-        {
-            Packet = packet;
-        }
         
-        public void Include(Message message)
-        {
-            Message = message;
-        }
+        public IMemberContainer Parent { get; set; }
     }
 
     public class Protocol : NestedMemberContainer, IMember, ITemplateType, INameable, IDocumentable
@@ -42,32 +41,36 @@ namespace Krypton.LibProtocol.Member
             Documentation = documentation;
         }
 
-        public IEnumerable<ProtocolPair> Pairs {
-            get
+        public override void AddMember(IMember member)
+        {
+            // if the member is a Message or Packet we will include them
+            // in a pair.
+            if (member is Message || member is Packet)
             {
-                var pairs = new Dictionary<string, ProtocolPair>();
-
-                foreach (var member in Members)
+                if (!TryFindMember(member.Name, out var existing))
                 {
-                    var name = member.Name;
-                    if (!pairs.TryGetValue(name, out var pair))
+                    existing = new ProtocolPair
                     {
-                        pair = new ProtocolPair();
-                    }
-
-                    if (member is Message)
-                    {
-                        pair.Include((Message)member);
-                    }
-                    else if (member is Packet)
-                    {
-                        pair.Include((Packet)member);
-                    }
-
-                    pairs[name] = pair;
+                        Name = member.Name,
+                        Parent = this
+                    };
+                    MemberList.Add(existing);
                 }
+                var pair = (ProtocolPair) existing;
 
-                return pairs.Values;
+                var message = member as Message;
+                if (message != null)
+                {
+                    pair.Message = message;
+                }
+                else
+                {
+                    pair.Packet = (Packet) member;
+                }
+            }
+            else
+            {
+                MemberList.Add(member);
             }
         }
     }
