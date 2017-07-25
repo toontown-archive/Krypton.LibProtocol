@@ -63,13 +63,13 @@ public class Structure <packet_parent_builder(packet)>
 {
     <packet.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
     
-    public override void Read(System.IO.BinaryReader br)
+    public <if(packet.SubPacket)>override<endif> void Read(System.IO.BinaryReader br)
     {
         <if(packet.SubPacket)>base.Read(br);<endif>
         <packet.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
     }
     
-    public override void Write(System.IO.BinaryWriter bw)
+    public <if(packet.SubPacket)>override<endif> void Write(System.IO.BinaryWriter bw)
     {
         <if(packet.SubPacket)>base.Write(bw);<endif>
         <packet.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
