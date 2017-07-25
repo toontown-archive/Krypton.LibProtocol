@@ -1,5 +1,4 @@
-﻿using System;
-using Krypton.LibProtocol.File;
+﻿using Krypton.LibProtocol.File;
 using Krypton.LibProtocol.File.Util;
 using Krypton.LibProtocol.Target.CSharp;
 
@@ -10,15 +9,15 @@ namespace Krypton.LibProtocol.TestConsole
         public static void Main(string[] args)
         {
             var resolver = new ContextualFileResolver();
-            resolver.Include("Resources/");
+            resolver.Include("../Doc/");
 
-            // Create a new definition file with a file resolver pointing to Resources/
+            // Create a new definition file with a file resolver pointing to ../Doc/
             var pf = new DefinitionFile
             {
                 Resolver = resolver
             };
             pf.PopulateBuiltins();
-            pf.Load("example.kpdl");
+            pf.Load("chatroom.kpdl");
             
             var settings = new CSharpTargetSettings
             {
