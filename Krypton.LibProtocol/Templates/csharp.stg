@@ -1,0 +1,219 @@
+render_member(member) ::= <<
+<member.Documentation>
+<([member.TemplateName, "_template"])(member)>
+>>
+
+target_members(container) ::= <<
+<container.Members:render_member(); separator="\n">
+>>
+
+/**
+    LIBRARY DECLARATION
+*/
+
+library_template(library) ::= <<
+namespace <library.name>
+{
+    <target_members(library)>
+}
+>>
+
+// groups
+group_template(gobj) ::= <<
+>>
+
+/**
+    PROTOCOL DECLARATION
+*/
+protocol_template(protocol) ::= <<
+namespace <protocol.name>
+{
+    <target_members(protocol)>
+}
+>>
+
+protocol_pair_template(pair) ::= <<
+<pair.Message.Documentation>
+public class <pair.name>
+{
+    public const int Id = <if(pair.Message)><pair.Message.Id><else>-1<endif>;
+    
+    <if(pair.Packet)>
+    <pair_packet_body(pair.Packet)>
+    <else>
+    public class Structure : Krypton.LibProtocol.IKryptonType
+    {
+        public void Read(System.IO.BinaryReader br)
+        {
+            throw new System.NotImplementedException();
+        }
+        
+        public void Write(System.IO.BinaryWriter bw)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+    <endif>
+}
+>>
+
+pair_packet_body(packet) ::= <<
+<packet.Documentation>
+public class Structure <packet_parent_builder(packet)>
+{
+    <packet.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
+    
+    public <if(packet.SubPacket)>override<endif> void Read(System.IO.BinaryReader br)
+    {
+        <if(packet.SubPacket)>base.Read(br);<endif>
+        <packet.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
+    }
+    
+    public <if(packet.SubPacket)>override<endif> void Write(System.IO.BinaryWriter bw)
+    {
+        <if(packet.SubPacket)>base.Write(bw);<endif>
+        <packet.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
+    }
+}
+>>
+
+// Parent builder
+packet_parent_builder(packet) ::= <<
+<if(packet.SubPacket)>
+: <packet.Members: {m | <m.classpath>}; separator=",">
+<else>
+: Krypton.LibProtocol.IKryptonType
+<endif>
+>>
+
+/**
+    PACKET DECLARATION
+*/
+packet_template(packet) ::= <<
+public abstract class <packet.Name> : Krypton.LibProtocol.IKryptonType
+{
+    <packet_body(packet)>
+}
+>>
+
+// packet body
+packet_body(packet) ::= <<
+<packet.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
+
+public virtual void Read(System.IO.BinaryReader br)
+{
+    <packet.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
+}
+
+public virtual void Write(System.IO.BinaryWriter bw)
+{
+    <packet.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
+}
+>>
+
+/**
+    TYPE DECLARATION
+*/
+
+typedecl_template(typedecl) ::= <<
+public struct <typedecl.name> : Krypton.LibProtocol.IKryptonType
+{
+    <typedecl_body(typedecl)>
+}
+>>
+
+generic_typedecl_template(typedecl) ::= <<
+public struct <generic_decl_name(typedecl)> : Krypton.LibProtocol.IKryptonType
+    <typedecl.Generics:generic_constraint(); separator="\n">
+{
+    <typedecl_body(typedecl)>
+}
+>>
+
+generic_decl_name(typedecl) ::= <<
+<typedecl.name>\<<typedecl.Generics:{g | <g.name>}; separator="\n">\>
+>>
+
+generic_constraint(generic) ::= <<
+where <generic.name>: Krypton.LibProtocol.IKryptonType, new()
+>>
+
+typedecl_body(typedecl) ::= <<
+<typedecl.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
+
+public void Read(System.IO.BinaryReader br)
+{
+    <typedecl.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
+}
+
+public void Write(System.IO.BinaryWriter bw)
+{
+    <typedecl.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
+}
+>>
+
+/**
+    STATEMENTS
+*/
+
+type_statement_reader(statement) ::= <<
+<s.name> = Krypton.LibProtocol.KryptonType\<<formal_typeref(statement.Type)>\>.Create();
+<s.name>.Read(br);
+>>
+
+if_statement_reader(statement) ::= <<
+<statement.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
+>>
+
+type_statement_ref(statement) ::= <<
+<statement.name>
+>>
+
+if_statement_ref(statement) ::= <<
+<statement.Statements: {s | <([s.TemplateName, "_ref"])(s)>}; separator="\n">
+>>
+
+type_statement_as_member(statement) ::= <<
+public <formal_typeref(statement.Type)> <statement.name> { get; set; }
+>>
+
+if_statement_as_member(statement) ::= <<
+<statement.Statements: {s | <([s.TemplateName, "_as_member"])(s)>}; separator="\n">
+>>
+
+/**
+    TYPE REFERENCING
+*/
+
+formal_typeref(typeref) ::= <<
+<if(typeref.namespace)><typeref.namespace>.<endif><(["resolve_", typeref.Type.TemplateName])(typeref.Type)>
+>>
+
+resolve_generic_type(type) ::= <<
+<resolve_concrete_type(type)>\<<type.Generics:formal_typeref()>\>
+>>
+
+resolve_concrete_type(type) ::= <<
+<if(builtin_type.(type.Name))><builtin_type.(type.Name)><else><type.name><endif>
+>>
+
+resolve_generic_attribute(generic) ::= <<
+<generic.name>
+>>
+
+// Builtin types to their perspective class names
+builtin_type ::= [
+    "byte": "Numericals.ByteType",
+    "sbyte": "Numericals.SByteType",
+    "bool": "Numericals.BoolType",
+    "int16": "Numericals.Int16Type",
+    "uint16": "Numericals.UInt16Type",
+    "int32": "Numericals.Int32Type",
+    "uint32": "Numericals.UInt32Type",
+    "int64": "Numericals.Int64Type",
+    "uint64": "Numericals.UInt64Type",
+    "string": "Collections.StringType",
+    "cstring": "Collections.CStringType",
+    "buffer": "Collections.BufferType",
+    "list": "Collections.ListType"
+]

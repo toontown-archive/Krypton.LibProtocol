@@ -1,0 +1,8 @@
+# Rider IDE:
+.idea/
+
+# Visual Studio Code:
+.vscode/
+
+# Mac directory info:
+.DS_Store
