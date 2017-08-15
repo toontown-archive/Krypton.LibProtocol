@@ -5,5 +5,6 @@
     /// </summary>
     public interface ICustomizable
     {
+        string Namespace { get; set; }
     }
 }

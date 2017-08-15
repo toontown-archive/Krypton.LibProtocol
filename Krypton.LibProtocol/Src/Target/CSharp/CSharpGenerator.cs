@@ -96,7 +96,10 @@ namespace Krypton.LibProtocol.Target.CSharp
                 var currentMem = typeref.Scope as IMember;
                 while (currentMem != null)
                 {
-                    namespaces.Add(currentMem.Name.ToCamelCase());
+                    // use a custom namespace if defined
+                    var custom = currentMem as ICustomizable;
+                    namespaces.Add(custom != null ? custom.Namespace : currentMem.Name.ToCamelCase());
+
                     currentMem = currentMem.Parent as IMember;
                 }
 
