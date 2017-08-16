@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Antlr4.StringTemplate;
@@ -42,6 +43,25 @@ namespace Krypton.LibProtocol.Target.CSharp
             } 
         }
 
+        private static string MemberNamespace(IMember member, params string[] prefix)
+        {
+            var namespaces = new List<string>();
+
+            while (member != null)
+            {
+                // use a custom namespace if defined
+                var custom = member as ICustomizable;
+                namespaces.Add(custom?.Namespace ?? member.Name.ToCamelCase());
+
+                member = member.Parent as IMember;
+            }
+
+            namespaces.Reverse();
+            namespaces.AddRange(prefix);
+
+            return string.Join(".", namespaces);
+        }
+
         private static void RegisterModelAdaptors(TemplateGroup template)
         {
             template.RegisterRenderer(typeof(Documentation), new DocumentationRenderer());
@@ -66,18 +86,7 @@ namespace Krypton.LibProtocol.Target.CSharp
             [Model("classpath")]
             public string Path(Packet packet)
             {
-                var namespaces = new List<string>();
-
-                var currentMem = packet.Parent as IMember;
-                while (currentMem != null)
-                {
-                    namespaces.Add(currentMem.Name.ToCamelCase());
-                    currentMem = currentMem.Parent as IMember;
-                }
-                
-                namespaces.Reverse();
-                namespaces.Add(packet.Name.ToCamelCase());
-                return string.Join(".", namespaces);
+                return MemberNamespace(packet.Parent as IMember, packet.Name.ToCamelCase());
             }
         }
 
@@ -91,25 +100,8 @@ namespace Krypton.LibProtocol.Target.CSharp
                     return "Krypton.LibProtocol";
                 }
 
-                var namespaces = new List<string>();
-
-                var currentMem = typeref.Scope as IMember;
-                while (currentMem != null)
-                {
-                    // use a custom namespace if defined
-                    var custom = currentMem as ICustomizable;
-                    namespaces.Add(custom != null ? custom.Namespace : currentMem.Name.ToCamelCase());
-
-                    currentMem = currentMem.Parent as IMember;
-                }
-
-                if (namespaces.Count == 0)
-                {
-                    return null;
-                }
-
-                namespaces.Reverse();
-                return string.Join(".", namespaces);
+                var ns = MemberNamespace(typeref.Scope as IMember);
+                return ns == "" ? null : ns; // string template doesn't consider an empty string as a null value
             }
         }
 
@@ -120,7 +112,9 @@ namespace Krypton.LibProtocol.Target.CSharp
             [Model("name")]
             public string Name(INameable nameable)
             {
-                return nameable.Name.ToCamelCase();
+                // use a custom namespace if defined
+                var custom = nameable as ICustomizable;
+                return custom?.Namespace ?? nameable.Name.ToCamelCase();
             }
         }
     }
