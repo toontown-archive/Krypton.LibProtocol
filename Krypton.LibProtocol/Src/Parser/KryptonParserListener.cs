@@ -64,16 +64,25 @@ namespace Krypton.LibProtocol.Parser
         {
             var parent = _memberContainers.Peek();
             var name = context.IDENTIFIER().GetText();
+            Library lib;
             
-            // Verify our name is unique
-            if (parent.TryFindMember(name, out var _))
+            // If we are taking the name of an already existant library, pass their reference
+            if (parent.TryFindMember(name, out var member))
             {
-                throw new KryptonParserException($"Multiple definitions for {name}.");
+                // verify the member we found is a library
+                lib = member as Library;
+                if (lib == null)
+                {
+                    throw new KryptonParserException($"Multiple definitions for {name}.");
+                } 
             }
-            
-            var lib = new Library(name, parent);
-            parent.AddMember(lib);
-            
+            else
+            {
+                // looks like we need to create a new library instance
+                lib = new Library(name, parent);
+                parent.AddMember(lib);
+            }
+
             _memberContainers.Push(lib);
             _contextStack.Push(lib);
             _customizables.Push(lib);
