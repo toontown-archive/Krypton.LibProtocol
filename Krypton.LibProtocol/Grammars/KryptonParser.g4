@@ -94,10 +94,68 @@ if_statement
     ;
 
 // Expressions
+// see https://github.com/antlr/grammars-v4/blob/master/csharp/CSharpParser.g4 line 83	
 
-// todo
-expression
-    : FALSE
+expression // alias
+    : conditional_or_expression 
+    ;
+
+conditional_or_expression
+	: conditional_and_expression ('||' conditional_and_expression)*
+	;
+
+conditional_and_expression
+	: inclusive_or_expression ('&&' inclusive_or_expression)*
+	;
+
+inclusive_or_expression
+	: exclusive_or_expression ('|' exclusive_or_expression)*
+	;
+
+exclusive_or_expression
+	: and_expression ('^' and_expression)*
+	;
+
+and_expression
+	: equality_expression ('&' equality_expression)*
+	;
+
+equality_expression
+	: relational_expression (('==' | '!=')  relational_expression)*
+	;
+
+relational_expression
+	: shift_expression (('<' | '>' | '<=' | '>=') shift_expression)*
+	;
+
+shift_expression
+	: additive_expression (('<<' | '>>')  additive_expression)*
+	;
+
+additive_expression
+	: multiplicative_expression (('+' | '-')  multiplicative_expression)*
+	;
+
+multiplicative_expression
+	: unary_expression (('*' | '/' | '%')  unary_expression)*
+	;
+
+// https://msdn.microsoft.com/library/6a71f45d(v=vs.110).aspx
+unary_expression
+	: expr_type
+	| '+' unary_expression
+	| '-' unary_expression
+	| '!' unary_expression
+	| '~' unary_expression
+	| '(' expr_type ')' unary_expression
+	| '&' unary_expression
+	| '*' unary_expression
+	;
+	
+expr_type
+    : TRUE | FALSE
+    | INTEGER | FLOAT
+    | IDENTIFIER
     ;
 
 // Member option parsing
