@@ -461,6 +461,14 @@ namespace Krypton.LibProtocol.Parser
             parent.AddExpresion((OperatorExpression) op);
         }
 
+        public override void EnterRelational_operator(KryptonParser.Relational_operatorContext context)
+        {
+            var parent = _expressionContainers.Peek();
+            
+            var op = context.GetText();
+            parent.AddExpresion((OperatorExpression) op);
+        }
+
         public override void EnterUnary_expression(KryptonParser.Unary_expressionContext context)
         {
             // We only care about the match if it contains an operator
