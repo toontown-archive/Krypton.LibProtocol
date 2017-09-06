@@ -37,6 +37,24 @@ fragment LIST : 'list' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 
+GREATER_OR_EQUAL : '>=' ;
+LESS_OR_EQUAL : '<=' ;
+EQUALITY : '==';
+INEQUALITY : '!=' ;
+LSHIFT : '<<' ;
+RSHIFT : '>>' ;
+ADD : '+' ;
+SUBTRACT : '-' ;
+MULTIPLY : '*' ;
+MODULUS : '%' ;
+NEGATE : '~' ;
+NOT : '!' ;
+EXCLUSIVE_OR : '^' ;
+INCLUSIVE_OR : '|' ;
+RELATIONAL_OR : '||' ;
+BINARY_AND : '&' ;
+RELATIONAL_AND : '&&' ;
+
 EQUALS : '=' ;
 DIRECTIVE : '=>' ;
 PERIOD : '.' ;
@@ -60,6 +78,7 @@ IDENTIFIER
     : [A-Za-z_][A-Za-z_0-9]+ 
     ;
 
+FLOAT : [0-9]+.[0-9]+ ;
 INTEGER : [0-9]+ ;
 
 // redirect comments to a different channel
@@ -103,21 +122,3 @@ STRING_VAL
   ;
 
 MEMBER_OPTION_WS : WS -> skip ;
-
-/**
-    Expression lexing
-*/
-
-mode EXPRESSIONS;
-GREATER : LARROW ;
-LESS : RARROW ;
-EQUAL : '==' ;
-NOTEQUAL : '!=' ;
-GREATER_OR_EQUAL : '>=' ;
-LESS_OR_EQUAL : '<=' ;
-
-OPERATOR 
-  : EQUAL | NOTEQUAL
-  | GREATER_OR_EQUAL | GREATER
-  | LESS_OR_EQUAL | LESS
-  ;

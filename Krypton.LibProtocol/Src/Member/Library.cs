@@ -11,7 +11,7 @@ namespace Krypton.LibProtocol.Member
         /// The target output namespace
         /// </summary>
         [Option("namespace")]
-        public string TargetNamespace { get; internal set; }
+        public string Namespace { get; set; }
 
         /// <summary>
         /// The alias used to reference the library inside the KPDL

@@ -77,7 +77,7 @@ generic_type_attributes
 // Operation statements
 
 if_statement
-    : '(' expression ')' '=>' '{' operation_statement+ '}' ';'
+    : '(' boolean_expression_tree ')' '=>' '{' operation_statement+ '}' ';'
     ;
  
  conditional_statement
@@ -95,9 +95,57 @@ if_statement
 
 // Expressions
 
-// todo
-expression
-    : FALSE
+boolean_expression_tree
+    : expression_tree relational_operator expression_tree 
+    | TRUE 
+    | FALSE
+    ;
+
+expression_tree
+    : unary_expression (expression_operator unary_expression)*
+    ;
+
+// https://msdn.microsoft.com/library/6a71f45d(v=vs.110).aspx
+unary_expression
+	: op='+' expression_tree
+	| op='-' expression_tree
+	| op='!' expression_tree
+	| op='~' expression_tree
+	| op='&' expression_tree
+	| op='*' expression_tree
+	| '(' expression_tree ')' unary_expression*
+	| literal_expression
+	;
+
+expression_operator
+    : relational_operator 
+    |'||' 
+    | '&&' 
+    | '|' 
+    | '&' 
+    | '^' 
+    | '<<' 
+    | '>>' 
+    | '+' 
+    | '-' 
+    | '*' 
+    | '/' 
+    | '%' 
+    ;
+
+relational_operator 
+    : '==' 
+    | '!=' 
+    | '<' 
+    | '<=' 
+    | '>' 
+    | '>=' 
+    ;
+    
+literal_expression
+    : TRUE | FALSE
+    | INTEGER | FLOAT
+    | IDENTIFIER
     ;
 
 // Member option parsing

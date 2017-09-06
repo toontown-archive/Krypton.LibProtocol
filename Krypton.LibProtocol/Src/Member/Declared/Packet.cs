@@ -10,6 +10,12 @@ namespace Krypton.LibProtocol.Member.Declared
     {
         public string TemplateName => "packet";
         
+        /// <summary>
+        /// The target output namespace
+        /// </summary>
+        [Option("namespace")]
+        public string Namespace { get; set; }
+        
         public string Name { get; }
 
         public Documentation Documentation { get; private set; }

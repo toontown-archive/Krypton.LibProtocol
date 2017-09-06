@@ -4,11 +4,13 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>dotnet-krypton</AssemblyName>
     <PackageId>Krypton.LibProtocol.Tool</PackageId>
-    <PackageVersion>1.0.0</PackageVersion>
     <PackageType>DotnetCliTool</PackageType>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <VersionPrefix>1.0.0</VersionPrefix>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krypton.LibProtocol\Krypton.LibProtocol.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
   </ItemGroup>
 </Project>

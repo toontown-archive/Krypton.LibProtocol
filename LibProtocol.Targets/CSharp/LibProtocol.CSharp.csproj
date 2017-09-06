@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Krypton.LibProtocol</RootNamespace>
-    <Optimize>true</Optimize>
+    <VersionPrefix>1.0.0</VersionPrefix>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />

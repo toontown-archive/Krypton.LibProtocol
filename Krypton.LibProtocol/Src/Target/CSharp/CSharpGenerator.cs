@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Antlr4.StringTemplate;
@@ -7,6 +8,7 @@ using Krypton.LibProtocol.File;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Declared;
+using Krypton.LibProtocol.Member.Expression;
 using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Target.CSharp
@@ -42,11 +44,31 @@ namespace Krypton.LibProtocol.Target.CSharp
             } 
         }
 
+        private static string MemberNamespace(IMember member, params string[] prefix)
+        {
+            var namespaces = new List<string>();
+
+            while (member != null)
+            {
+                // use a custom namespace if defined
+                var custom = member as ICustomizable;
+                namespaces.Add(custom?.Namespace ?? member.Name.ToCamelCase());
+
+                member = member.Parent as IMember;
+            }
+
+            namespaces.Reverse();
+            namespaces.AddRange(prefix);
+
+            return string.Join(".", namespaces);
+        }
+
         private static void RegisterModelAdaptors(TemplateGroup template)
         {
             template.RegisterRenderer(typeof(Documentation), new DocumentationRenderer());
             template.RegisterModelAdaptor(typeof(ITypeReference), new ITypeReferenceAdaptor());
             template.RegisterModelAdaptor(typeof(Packet), new PacketReferenceAdaptor());
+            template.RegisterModelAdaptor(typeof(OperatorExpression), new OperatorExpressionAdaptor());
             
             // register base model adaptors as fallbacks
             template.RegisterModelAdaptor(typeof(INameable), new INameableModelAdaptor());
@@ -66,18 +88,22 @@ namespace Krypton.LibProtocol.Target.CSharp
             [Model("classpath")]
             public string Path(Packet packet)
             {
-                var namespaces = new List<string>();
+                return MemberNamespace(packet.Parent as IMember, packet.Name.ToCamelCase());
+            }
+        }
 
-                var currentMem = packet.Parent as IMember;
-                while (currentMem != null)
-                {
-                    namespaces.Add(currentMem.Name.ToCamelCase());
-                    currentMem = currentMem.Parent as IMember;
-                }
-                
-                namespaces.Reverse();
-                namespaces.Add(packet.Name.ToCamelCase());
-                return string.Join(".", namespaces);
+        private class OperatorExpressionAdaptor : TargetModelAdaptor
+        {
+            [Model("operator")]
+            public string Operator(OperatorExpression expression)
+            {
+                // the operator type enum contains operators which, when changed to string form,
+                // are 1 to 1 with the C# spec. With this established, we only need to convert type to a string
+                // and return it.
+
+                var numerical = (int)expression.Type;
+                var chars = new [] { (char)(numerical>>16),  (char)numerical };
+                return new string(chars);
             }
         }
 
@@ -91,22 +117,8 @@ namespace Krypton.LibProtocol.Target.CSharp
                     return "Krypton.LibProtocol";
                 }
 
-                var namespaces = new List<string>();
-
-                var currentMem = typeref.Scope as IMember;
-                while (currentMem != null)
-                {
-                    namespaces.Add(currentMem.Name.ToCamelCase());
-                    currentMem = currentMem.Parent as IMember;
-                }
-
-                if (namespaces.Count == 0)
-                {
-                    return null;
-                }
-
-                namespaces.Reverse();
-                return string.Join(".", namespaces);
+                var ns = MemberNamespace(typeref.Scope as IMember);
+                return ns == "" ? null : ns; // string template doesn't consider an empty string as a null value
             }
         }
 
@@ -117,7 +129,9 @@ namespace Krypton.LibProtocol.Target.CSharp
             [Model("name")]
             public string Name(INameable nameable)
             {
-                return nameable.Name.ToCamelCase();
+                // use a custom namespace if defined
+                var custom = nameable as ICustomizable;
+                return custom?.Namespace ?? nameable.Name.ToCamelCase();
             }
         }
     }
