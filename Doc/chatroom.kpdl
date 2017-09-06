@@ -29,9 +29,8 @@ library chatroom {
         packet ConnectResponse {
             bool successful;
             
-            # expressions have yet to be implemented.
-            # normaly this would be "(successful == true) =>"
-            (false) => {
+            // only include the connection id and channel list if we were successful
+            (successful == true) => {
                 uint16 connection_id;
                 
                 // list of channels in the chatroom

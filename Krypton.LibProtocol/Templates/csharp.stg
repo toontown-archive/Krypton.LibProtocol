@@ -72,7 +72,7 @@ public class Structure <packet_parent_builder(packet)>
     public <if(packet.SubPacket)>override<endif> void Write(System.IO.BinaryWriter bw)
     {
         <if(packet.SubPacket)>base.Write(bw);<endif>
-        <packet.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
+        <packet.Statements: {s | <([s.TemplateName, "_writer"])(s)>.Write(bw);}; separator="\n">
     }
 }
 >>
@@ -148,12 +148,12 @@ public void Read(System.IO.BinaryReader br)
 
 public void Write(System.IO.BinaryWriter bw)
 {
-    <typedecl.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
+    <typedecl.Statements: {s | <([s.TemplateName, "_writer"])(s)>}; separator="\n">
 }
 >>
 
 /**
-    STATEMENTS
+    READING STATEMENTS
 */
 
 type_statement_reader(statement) ::= <<
@@ -162,16 +162,30 @@ type_statement_reader(statement) ::= <<
 >>
 
 if_statement_reader(statement) ::= <<
-<statement.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
+<statement.Documentation>
+if (<statement.Expressions: {e | <(e.TemplateName)(e)>}>) {
+    <statement.Statements: {s | <([s.TemplateName, "_reader"])(s)>}; separator="\n">
+}
 >>
 
-type_statement_ref(statement) ::= <<
-<statement.name>
+/**
+    WRITING STATEMENTS
+*/
+
+type_statement_writer(statement) ::= <<
+<statement.name>.Write(bw);
 >>
 
-if_statement_ref(statement) ::= <<
-<statement.Statements: {s | <([s.TemplateName, "_ref"])(s)>}; separator="\n">
+if_statement_writer(statement) ::= <<
+<statement.Documentation>
+if (<statement.Expressions: {e | <(e.TemplateName)(e)>}>) {
+    <statement.Statements: {s | <([s.TemplateName, "_writer"])(s)>}; separator="\n">
+}
 >>
+
+/**
+    STATEMENTS AS MEMBERS
+*/
 
 type_statement_as_member(statement) ::= <<
 public <formal_typeref(statement.Type)> <statement.name> { get; set; }
@@ -217,3 +231,27 @@ builtin_type ::= [
     "buffer": "Collections.BufferType",
     "list": "Collections.ListType"
 ]
+
+/**
+    EXPRESSIONS
+*/
+
+expression_tree(expr) ::= <<
+(<expr.Expressions: {e | <(e.TemplateName)(e)>}>)
+>>
+
+operator_expression(expr) ::= <<
+<expr.operator>
+>>
+
+numerical_expression(expr) ::= <<
+<expr.Value>
+>>
+
+boolean_expression(expr) ::= <<
+<expr.Value>
+>>
+
+nameable_expression(expr) ::= <<
+<expr.Nameable.name>
+>>
