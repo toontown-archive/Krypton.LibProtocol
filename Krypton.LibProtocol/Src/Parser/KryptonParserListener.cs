@@ -6,6 +6,7 @@ using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Declared;
 using Krypton.LibProtocol.Member.Declared.Type;
+using Krypton.LibProtocol.Member.Expression;
 using Krypton.LibProtocol.Member.Statement;
 using Krypton.LibProtocol.Member.Type;
 
@@ -13,8 +14,9 @@ namespace Krypton.LibProtocol.Parser
 {
     public class KryptonParserListener : KryptonParserBaseListener
     {
-        private const string _nsDelimiter = "::";
-        private const string _thisKeyword = "this";
+        private const string NamespaceDelimiterToken = "::";
+        private const string LocalNamespaceToken = "this";
+        
         private readonly DefinitionFile _file;
         private readonly Stack<ICustomizable> _customizables;
         private readonly Stack<IMemberContainer> _memberContainers;
@@ -22,6 +24,7 @@ namespace Krypton.LibProtocol.Parser
         private readonly Stack<ITypeReferenceContainer> _typeReferenceContainers;
         private readonly Stack<IMemberContainer> _contextStack;
         private readonly Stack<IDocumentable> _documentables;
+        private readonly Stack<IExpressionContainer> _expressionContainers;
         
         public KryptonParserListener(DefinitionFile file)
         {
@@ -32,6 +35,7 @@ namespace Krypton.LibProtocol.Parser
             _typeReferenceContainers = new Stack<ITypeReferenceContainer>();
             _contextStack = new Stack<IMemberContainer>();
             _documentables = new Stack<IDocumentable>();
+            _expressionContainers = new Stack<IExpressionContainer>();
             
             // the definition file is our root container and context
             _memberContainers.Push(_file);
@@ -221,15 +225,14 @@ namespace Krypton.LibProtocol.Parser
         public override void EnterPacket_parent(KryptonParser.Packet_parentContext context)
         {
             var ns = context.namespace_reference()?.GetText() ?? "";
-            var path = ns.Split(new[] {_nsDelimiter}, StringSplitOptions.RemoveEmptyEntries);
+            var path = ns.Split(new[] {NamespaceDelimiterToken}, StringSplitOptions.RemoveEmptyEntries);
             var name = context.IDENTIFIER().GetText();
 
             var parent = _memberContainers.Peek();
             var activeContext = _contextStack.Peek();
             
             // Resolve the member reference
-            IMember member;
-            if (!TryResolveMember(path, name, activeContext, out member))
+            if (!TryResolveMember(path, name, activeContext, out var member))
             {
                 throw new KryptonParserException($"No such packet reference {ns} {name}");
             }
@@ -328,17 +331,16 @@ namespace Krypton.LibProtocol.Parser
             
             // if "this" is the namespace we are referencing the local context
             // setting the namespace to nothing will make us look through the active context first
-            if (ns == _thisKeyword)
+            if (ns == LocalNamespaceToken)
             {
                 ns = ""; 
             }
 
-            var path = ns.Split(new[] {_nsDelimiter}, StringSplitOptions.RemoveEmptyEntries);
+            var path = ns.Split(new[] {NamespaceDelimiterToken}, StringSplitOptions.RemoveEmptyEntries);
             var activeContext = _contextStack.Peek();
             
             // Resolve the member reference
-            IMember member;
-            if (!TryResolveMember(path, name, activeContext, out member))
+            if (!TryResolveMember(path, name, activeContext, out var member))
             {
                 throw new KryptonParserException($"Unable to resolve type {ns} {name}");
             }
@@ -417,6 +419,99 @@ namespace Krypton.LibProtocol.Parser
         public override void ExitData_statement(KryptonParser.Data_statementContext context)
         {
             _typeReferenceContainers.Pop();
+        }
+
+        public override void EnterIf_statement(KryptonParser.If_statementContext context)
+        {
+            var parent = _statementContainers.Peek();
+            var statement = new IfStatement(parent);
+            
+            parent.AddStatement(statement);
+            _statementContainers.Push(statement);
+            _expressionContainers.Push(statement);
+            _documentables.Push(statement);
+        }
+
+        public override void ExitIf_statement(KryptonParser.If_statementContext context)
+        {
+            _statementContainers.Pop();
+            _expressionContainers.Pop();
+            _documentables.Pop();
+        }
+
+        public override void EnterExpression_tree(KryptonParser.Expression_treeContext context)
+        {
+            var parent = _expressionContainers.Peek();
+            var group = new ExpressionTree();
+            
+            parent.AddExpresion(group);
+            _expressionContainers.Push(group);
+        }
+
+        public override void ExitExpression_tree(KryptonParser.Expression_treeContext context)
+        {
+            _expressionContainers.Pop();
+        }
+
+        public override void EnterExpression_operator(KryptonParser.Expression_operatorContext context)
+        {
+            var parent = _expressionContainers.Peek();
+            
+            var op = context.GetText();
+            parent.AddExpresion((OperatorExpression) op);
+        }
+
+        public override void EnterUnary_expression(KryptonParser.Unary_expressionContext context)
+        {
+            // We only care about the match if it contains an operator
+            if (context.op == null)
+            {
+                return;
+            }
+            
+            var parent = _expressionContainers.Peek();
+            parent.AddExpresion((OperatorExpression) context.op.Text);
+        }
+
+        public override void EnterLiteral_expression(KryptonParser.Literal_expressionContext context)
+        {
+            var parent = _expressionContainers.Peek();
+
+            if (context.TRUE() != null)
+            {
+                parent.AddExpresion(new NumericalExpression(1));
+            } 
+            else if (context.FALSE() != null)
+            {
+                parent.AddExpresion(new NumericalExpression(0));
+            }
+            // TODO: change to a context.NUMERICAL structure. It will allow us to easily add numerical types later on.
+            else if (context.INTEGER() != null || context.FLOAT() != null)
+            {
+                if (!int.TryParse(context.GetText(), out var val))
+                {
+                    throw new KryptonParserException("Error parsing numerical value: " + context.GetText());
+                }
+                parent.AddExpresion(new NumericalExpression(val));
+            }
+            else if (context.IDENTIFIER() != null)
+            {
+                var container = _statementContainers.Peek();
+                var name = context.GetText();
+                
+                var nameable = StatementContainerUtils.FindStatement(container,
+                    x =>
+                    {
+                        // We only care about nameables
+                        if (!(x is INameable y)) return false;
+                        
+                        // check if the name matches the identifier we matched against
+                        return y.Name == name; // Is this better than doing == context.GetText()? Id assume so.
+                    }
+                ) ?? throw new KryptonParserException("Unknown reference: " + name); // throw if null
+                
+                parent.AddExpresion(new NameableExpression((INameable)nameable));
+            }
         }
 
         /// <summary>
