@@ -8,6 +8,7 @@ using Krypton.LibProtocol.File;
 using Krypton.LibProtocol.Member;
 using Krypton.LibProtocol.Member.Common;
 using Krypton.LibProtocol.Member.Declared;
+using Krypton.LibProtocol.Member.Expression;
 using Krypton.LibProtocol.Member.Type;
 
 namespace Krypton.LibProtocol.Target.CSharp
@@ -87,6 +88,21 @@ namespace Krypton.LibProtocol.Target.CSharp
             public string Path(Packet packet)
             {
                 return MemberNamespace(packet.Parent as IMember, packet.Name.ToCamelCase());
+            }
+        }
+
+        private class OperatorExpressionAdaptor : TargetModelAdaptor
+        {
+            [Model("operator")]
+            public string Operator(OperatorExpression expression)
+            {
+                // the operator type enum contains operators which, when changed to string form,
+                // are 1 to 1 with the C# spec. With this established, we only need to convert type to a string
+                // and return it.
+
+                var numerical = (int)expression.Type;
+                var chars = new [] { (char)(numerical>>16),  (char)numerical };
+                return new string(chars);
             }
         }
 
