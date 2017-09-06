@@ -77,7 +77,7 @@ generic_type_attributes
 // Operation statements
 
 if_statement
-    : '(' expression ')' '=>' '{' operation_statement+ '}' ';'
+    : '(' boolean_expression_tree ')' '=>' '{' operation_statement+ '}' ';'
     ;
  
  conditional_statement
@@ -94,65 +94,55 @@ if_statement
     ;
 
 // Expressions
-// see https://github.com/antlr/grammars-v4/blob/master/csharp/CSharpParser.g4 line 83	
 
-expression // alias
-    : conditional_or_expression 
+boolean_expression_tree
+    : expression_tree relational_operator expression_tree 
+    | TRUE 
+    | FALSE
     ;
 
-conditional_or_expression
-	: conditional_and_expression ('||' conditional_and_expression)*
-	;
-
-conditional_and_expression
-	: inclusive_or_expression ('&&' inclusive_or_expression)*
-	;
-
-inclusive_or_expression
-	: exclusive_or_expression ('|' exclusive_or_expression)*
-	;
-
-exclusive_or_expression
-	: and_expression ('^' and_expression)*
-	;
-
-and_expression
-	: equality_expression ('&' equality_expression)*
-	;
-
-equality_expression
-	: relational_expression (('==' | '!=')  relational_expression)*
-	;
-
-relational_expression
-	: shift_expression (('<' | '>' | '<=' | '>=') shift_expression)*
-	;
-
-shift_expression
-	: additive_expression (('<<' | '>>')  additive_expression)*
-	;
-
-additive_expression
-	: multiplicative_expression (('+' | '-')  multiplicative_expression)*
-	;
-
-multiplicative_expression
-	: unary_expression (('*' | '/' | '%')  unary_expression)*
-	;
+expression_tree
+    : unary_expression (expression_operator unary_expression)*
+    ;
 
 // https://msdn.microsoft.com/library/6a71f45d(v=vs.110).aspx
 unary_expression
-	: expr_type
-	| '+' unary_expression
-	| '-' unary_expression
-	| '!' unary_expression
-	| '~' unary_expression
-	| '(' expr_type ')' unary_expression
-	| '&' unary_expression
-	| '*' unary_expression
+	: op='+' expression_tree
+	| op='-' expression_tree
+	| op='!' expression_tree
+	| op='~' expression_tree
+	| op='&' expression_tree
+	| op='*' expression_tree
+	| '(' expression_tree ')' unary_expression*
+	| literal_expression
 	;
-	
-expr_type
+
+expression_operator
+    : relational_operator 
+    |'||' 
+    | '&&' 
+    | '|' 
+    | '&' 
+    | '^' 
+    | '<<' 
+    | '>>' 
+    | '+' 
+    | '-' 
+    | '*' 
+    | '/' 
+    | '%' 
+    ;
+
+relational_operator 
+    : '==' 
+    | '!=' 
+    | '<' 
+    | '<=' 
+    | '>' 
+    | '>=' 
+    ;
+    
+literal_expression
     : TRUE | FALSE
     | INTEGER | FLOAT
     | IDENTIFIER
