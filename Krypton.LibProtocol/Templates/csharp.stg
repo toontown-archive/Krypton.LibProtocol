@@ -72,7 +72,7 @@ public class Structure <packet_parent_builder(packet)>
     public <if(packet.SubPacket)>override<endif> void Write(System.IO.BinaryWriter bw)
     {
         <if(packet.SubPacket)>base.Write(bw);<endif>
-        <packet.Statements: {s | <([s.TemplateName, "_writer"])(s)>.Write(bw);}; separator="\n">
+        <packet.Statements: {s | <([s.TemplateName, "_writer"])(s)>}; separator="\n">
     }
 }
 >>
@@ -107,7 +107,7 @@ public virtual void Read(System.IO.BinaryReader br)
 
 public virtual void Write(System.IO.BinaryWriter bw)
 {
-    <packet.Statements: {s | <([s.TemplateName, "_ref"])(s)>.Write(bw);}; separator="\n">
+    <packet.Statements: {s | <([s.TemplateName, "_writer"])(s)>}; separator="\n">
 }
 >>
 
