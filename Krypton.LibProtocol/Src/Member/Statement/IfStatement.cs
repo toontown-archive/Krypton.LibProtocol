@@ -24,7 +24,7 @@ namespace Krypton.LibProtocol.Member.Statement
             Parent = parent;
             
             Statements = new ReadOnlyCollection<IStatement>(_statements);
-            Expression = new ReadOnlyCollection<IExpression>(_expressions);
+            Expressions = new ReadOnlyCollection<IExpression>(_expressions);
         }
 
         public void AddStatement(IStatement statement)
