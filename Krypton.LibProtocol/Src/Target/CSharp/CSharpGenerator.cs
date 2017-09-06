@@ -68,6 +68,7 @@ namespace Krypton.LibProtocol.Target.CSharp
             template.RegisterRenderer(typeof(Documentation), new DocumentationRenderer());
             template.RegisterModelAdaptor(typeof(ITypeReference), new ITypeReferenceAdaptor());
             template.RegisterModelAdaptor(typeof(Packet), new PacketReferenceAdaptor());
+            template.RegisterModelAdaptor(typeof(OperatorExpression), new OperatorExpressionAdaptor());
             
             // register base model adaptors as fallbacks
             template.RegisterModelAdaptor(typeof(INameable), new INameableModelAdaptor());
