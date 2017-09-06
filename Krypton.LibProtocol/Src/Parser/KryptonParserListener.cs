@@ -479,11 +479,11 @@ namespace Krypton.LibProtocol.Parser
 
             if (context.TRUE() != null)
             {
-                parent.AddExpresion(new NumericalExpression(1));
+                parent.AddExpresion(new BooleanExpression(true));
             } 
             else if (context.FALSE() != null)
             {
-                parent.AddExpresion(new NumericalExpression(0));
+                parent.AddExpresion(new BooleanExpression(false));
             }
             // TODO: change to a context.NUMERICAL structure. It will allow us to easily add numerical types later on.
             else if (context.INTEGER() != null || context.FLOAT() != null)
