@@ -125,12 +125,12 @@ namespace <@namespace>Krypton.LibProtocol.Numericals<@end>
             return ((IConvertible)_value).ToUInt64(provider);
         }
         
-        public <type> Equals(<type> other)
+        public bool Equals(<type> other)
         {
             return _value.Equals(other);
         }
         
-        public <type> Equals(<identifier> other)
+        public bool Equals(<identifier> other)
         {
             return _value.Equals(other._value);
         }
