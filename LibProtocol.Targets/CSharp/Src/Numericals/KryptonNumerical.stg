@@ -22,16 +22,6 @@ namespace <@namespace>Krypton.LibProtocol.Numericals<@end>
         {
             return val._value;
         }
-        
-        public static explicit operator <identifier>(<type> val)
-        {
-            return new <identifier> { _value = val };
-        }
-        
-        public static explicit operator <type>(<identifier> val)
-        {
-            return val._value;
-        }
         <@end>
         
         <@methods>
@@ -169,4 +159,4 @@ namespace <@namespace>Krypton.LibProtocol.Numericals<@end>
 }
 >>
 
-throw_not_implemented() ::= "throw new NotImplementedException()"
+throw_not_implemented() ::= "throw new NotImplementedException();"
