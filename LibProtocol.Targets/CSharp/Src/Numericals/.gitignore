@@ -1,0 +1,4 @@
+# Required until StringTemplate.MSBuild allows for a configurable output directory.
+
+*.cs
+!IKryptonNumerical.cs

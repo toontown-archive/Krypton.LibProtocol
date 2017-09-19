@@ -1,0 +1,5 @@
+import "FormattableNumerical.stg" 
+ 
+render() ::= << 
+<type_definition("KryptonSByte", "sbyte")> 
+>>
