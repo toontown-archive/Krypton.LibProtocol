@@ -5,6 +5,7 @@
     <VersionPrefix>1.0.0</VersionPrefix>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="StringTemplate.MSBuild" Version="1.0.1" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
   </ItemGroup>

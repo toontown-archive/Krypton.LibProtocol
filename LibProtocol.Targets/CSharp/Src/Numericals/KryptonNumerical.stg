@@ -1,0 +1,172 @@
+type_definition(identifier, type) ::= <<
+namespace <@namespace>Krypton.LibProtocol.Numericals<@end>
+{
+    <@dependencies> 
+    using System;
+    using System.Threading.Tasks;
+    <@end>
+
+    public struct <identifier> <@interfaces>: IKryptonNumerical\<<identifier>\>, IKryptonNumerical\<<type>\><@end>
+    {
+        <@members>
+        private <type> _value;
+        <@end>
+        
+        <@casts>
+        public static implicit operator <identifier>(<type> val)
+        {
+            return new <identifier> { _value = val };
+        }
+        
+        public static implicit operator <type>(<identifier> val)
+        {
+            return val._value;
+        }
+        
+        public static explicit operator <identifier>(<type> val)
+        {
+            return new <identifier> { _value = val };
+        }
+        
+        public static explicit operator <type>(<identifier> val)
+        {
+            return val._value;
+        }
+        <@end>
+        
+        <@methods>
+        public int CompareTo(object obj)
+        {
+            return _value.CompareTo(obj);
+        }
+        
+        public int CompareTo(<type> other)
+        {
+            return _value.CompareTo(other);
+        }
+        
+        public int CompareTo(<identifier> other)
+        {
+            return _value.CompareTo(other._value);
+        }
+        
+        public TypeCode GetTypeCode()
+        {
+            return _value.GetTypeCode();
+        }
+        
+        public bool ToBoolean(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToBoolean(provider);
+        }
+        
+        public byte ToByte(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToByte(provider);
+        }
+        
+        public char ToChar(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToChar(provider);
+        }
+        
+        public DateTime ToDateTime(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToDateTime(provider);
+        }
+        
+        public decimal ToDecimal(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToDecimal(provider);
+        }
+        
+        public double ToDouble(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToDouble(provider);
+        }
+        
+        public short ToInt16(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToInt16(provider);
+        }
+        
+        public int ToInt32(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToInt32(provider);
+        }
+        
+        public long ToInt64(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToInt64(provider);
+        }
+        
+        public sbyte ToSByte(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToSByte(provider);
+        }
+        
+        public float ToSingle(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToSingle(provider);
+        }
+        
+        public string ToString(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToString(provider);
+        }
+        
+        public object ToType(Type conversionType, IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToType(conversionType, provider);
+        }
+        
+        public ushort ToUInt16(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToUInt16(provider);
+        }
+        
+        public uint ToUInt32(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToUInt32(provider);
+        }
+        
+        public ulong ToUInt64(IFormatProvider provider)
+        {
+            return ((IConvertible)_value).ToUInt64(provider);
+        }
+        
+        public <type> Equals(<type> other)
+        {
+            return _value.Equals(other);
+        }
+        
+        public <type> Equals(<identifier> other)
+        {
+            return _value.Equals(other._value);
+        }
+        
+        public void Write(IKryptonCodec codec)
+        {
+            <@write><throw_not_implemented()><@end>
+        }
+        
+        public async Task WriteAsync(IKryptonCodec codec)
+        {
+            <@write_async><throw_not_implemented()><@end>
+        }
+        
+        public void Read(IKryptonCodec codec)
+        {
+            <@read><throw_not_implemented()><@end>
+        }
+        
+        public async Task ReadAsync(IKryptonCodec codec)
+        {
+            <@read_async><throw_not_implemented()><@end>
+        }   
+        <@end>
+    }
+}
+>>
+
+throw_not_implemented() ::= "throw new NotImplementedException()"
