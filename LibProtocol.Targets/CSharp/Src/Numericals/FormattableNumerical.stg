@@ -1,0 +1,14 @@
+import "KryptonNumerical.stg"
+
+@type_definition.interfaces() ::= <<
+<@super.interfaces()>, IFormattable
+>>
+
+@type_definition.methods() ::= <<
+<@super.methods()>
+
+public string ToString(string format, IFormatProvider formatProvider) 
+{
+    return _value.ToString(format, formatProvider); 
+}
+>>
