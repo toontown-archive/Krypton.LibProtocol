@@ -1,28 +1,36 @@
 ﻿using System;
-using System.IO;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
+using System.Threading.Tasks;
 
 namespace Krypton.LibProtocol
 {
     public interface IKryptonType
     {
         /// <summary>
-        /// Writes the type to a BufferWriter
+        /// Writes the type to an IKryptonCodec
         /// </summary>
-        /// <param name="bw"></param>
-        void Write(BinaryWriter bw);
+        /// <param name="codec"></param>
+        void Write(IKryptonCodec codec);
+
+        Task WriteAsync(IKryptonCodec codec);
 
         /// <summary>
-        /// Populates the type with data read from the BufferReader
+        /// Populates the type with data read from an IKryptonCodec
         /// </summary>
-        /// <param name="br"></param>
-        void Read(BinaryReader br);
+        /// <param name="codec"></param>
+        void Read(IKryptonCodec codec);
+
+        Task ReadAsync(IKryptonCodec codec);
     }
 
-    public abstract class KryptonType<T> : IKryptonType where T: IKryptonType, new()
+    public interface IKryptonType<T> : IKryptonType
     {
-        private static Func<TK> GenerateFactory<TK>() where TK: IKryptonType, new()
+    }
+
+    public abstract class KryptonType<T> : IKryptonType where T: IKryptonType<T>, new()
+    {
+        private static Func<IKryptonType<TK>> GenerateFactory<TK>() where TK: IKryptonType<TK>, new()
         {
             Expression<Func<TK>> expr = () => new TK();
             var newExpr = (NewExpression)expr.Body;
@@ -31,43 +39,36 @@ namespace Krypton.LibProtocol
                 name: "lambda", 
                 returnType: newExpr.Type,
                 parameterTypes: new System.Type[0],
-                m: typeof(KryptonType<>).Module,
+                m: typeof(IKryptonType<TK>).Module,
                 skipVisibility: true);
  
             var ilGen = method.GetILGenerator();
             ilGen.Emit(OpCodes.Newobj, newExpr.Constructor);
             ilGen.Emit(OpCodes.Ret);
  
-            return (Func<TK>)method.CreateDelegate(typeof(Func<TK>));
+            return (Func<IKryptonType<TK>>)method.CreateDelegate(typeof(Func<IKryptonType<TK>>));
         }
-        
-        public static readonly Func<T> Create = GenerateFactory<T>();
+
+        public static readonly Func<IKryptonType<T>> Create = GenerateFactory<T>();
 
         /// <summary>
         /// Creates and populates a type from the BufferReader
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
-        public static T Build(Stream s)
+        public static IKryptonType<T> Build(IKryptonCodec s)
         {
             var inst = Create();
-            using (var br = new BinaryReader(s))
-            {
-                inst.Read(br);
-            }
+            inst.Read(s);
             return inst;
         }
 
-        public static void Pack(IKryptonType type, Stream s)
-        {
-            using (var bw = new BinaryWriter(s))
-            {
-                type.Write(bw);
-            }
-        }
+        public abstract void Write(IKryptonCodec codec);
 
-        public abstract void Write(BinaryWriter bw);
-
-        public abstract void Read(BinaryReader br);
+        public abstract void Read(IKryptonCodec codec);
+        
+        public abstract Task WriteAsync(IKryptonCodec codec);
+        
+        public abstract Task ReadAsync(IKryptonCodec codec);
     }
 }
